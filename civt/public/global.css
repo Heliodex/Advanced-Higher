@@ -1,0 +1,15 @@
+body {
+	background: black;
+	color: white;
+}
+
+nav {
+	display: flex;
+	gap: 1rem;
+	padding-bottom: 1rem;
+}
+
+a {
+	color: cyan;
+	text-decoration: none;
+}

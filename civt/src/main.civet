@@ -1,0 +1,64 @@
+{ Elysia } from elysia
+{ html } from @elysiajs/html
+{ staticPlugin } from @elysiajs/static
+
+Base := (f: { children: any }) => 
+	<html>
+		<head>
+			<script src="https://esm.sh/htmx.org" type="module">
+			<link rel="stylesheet" href="/public/global.css">
+			<meta charset="utf-8">
+			<title>hello world
+		<body>
+			<nav style="color:cyan">
+				<a href="/">home
+				<a href="/login">login
+			{ f.children }
+
+new Elysia()
+	.use staticPlugin()
+	.use html()
+
+    .onError(({ code, set }) => {
+        if code == "NOT_FOUND"
+			"Not Found :("
+	})
+	.get "/test", =>
+		<div #test>{Math.random()}
+
+	.get  "/", ({ set, cookie }) =>
+		if !cookie?.auth_session
+			set.redirect = "/login"
+			return
+
+		<Base>
+			<button
+				hx-get="/test"
+				hx-swap="outerHTML"
+				hx-target="#test"
+			>click me
+			<div #test>hello worl
+
+	.get "/login", ({ set, cookie }) =>
+		if cookie?.auth_session
+			set.redirect = "/home"
+		
+		<Base>
+			<form method="POST">
+				<input name="username" placeholder="username" required>
+				<input name="password" placeholder="password" required>
+				<button>login
+
+	.post "/login", ({ set, body }) =>
+		{ username, password } := body as {
+			username: string
+			password: string
+		}
+		if !username or !password
+			console.log "invalid username or password"
+			set.redirect = "/login"
+			return
+
+	.listen 3000
+
+console.log "server started @ http://localhost:3000/"
