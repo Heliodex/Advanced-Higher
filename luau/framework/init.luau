@@ -39,11 +39,11 @@ function logReq(request: net.ServeRequest, status: number)
 	local path = request.path
 
 	-- Colour the status number
-	local colouredStatus = if 200 < status and status < 300
+	local colouredStatus = if 200 <= status and status < 300
 		then green .. status
-		elseif 300 < status and status < 400 then yellow .. status
-		elseif 400 < status and status < 500 then red .. status
-		elseif 500 < status and status < 600 then purple .. status
+		elseif 300 <= status and status < 400 then yellow .. status
+		elseif 400 <= status and status < 500 then red .. status
+		elseif 500 <= status and status < 600 then purple .. status
 		else status
 
 	-- Colour the method name
@@ -57,109 +57,92 @@ function logReq(request: net.ServeRequest, status: number)
 	print(`[{colouredStatus}{reset}]`, colouredMethod, reset, path)
 end
 
-function framework:_requester(
-	method: string,
-	path: string,
-	callback: (
-		request: net.ServeRequest
-	) -> net.ServeResponse
-)
-	self._routes = self._routes or {}
-	self._routes[path] = self._routes[path] or {}
-	table.insert(self._routes[path], {
-		method = method,
-		path = path,
-		callback = callback,
-	})
-
+--[=[
+	Sets the public directory, where static files are served from.
+]=]
+function framework:public(filepath: string?)
+	self._public = filepath or "public"
 	return self
 end
 
-local function readRecursive(path: string)
-	local dir = fs.readDir(path)
-	local files = {}
+--[=[
+	Sets the routes directory, where routes are loaded from.
+]=]
+function framework:routes(filepath: string?)
+	self._routes = filepath or "routes"
+	return self
+end
 
-	for _, file in ipairs(dir) do
-		local filePath = path .. "/" .. file
-		local isDir = fs.isDir(filePath)
-
-		if isDir then
-			local subFiles = readRecursive(filePath)
-			for _, subFile in ipairs(subFiles) do
-				table.insert(files, file .. "/" .. subFile)
-			end
-		else
-			table.insert(files, file)
-		end
+local function loadRoute(
+	filename: string,
+	request: net.ServeRequest,
+	status: number
+)
+	local ok, page = pcall(require, filename)
+	if not ok then
+		error(page)
 	end
 
-	return files
+	-- let's do this
+
+	local load = page:load(request, status)
+
+	return load
 end
 
-function framework:mount(filepath: string, path: string)
-	-- local dir = readRecursive(path)
-	self._fileroutes = self._fileroutes or {}
-	table.insert(self._fileroutes, {
-		filepath = filepath,
-		path = path,
-	})
+local function loadError(
+	basePath: string,
+	status: number,
+	request: net.ServeRequest
+): net.ServeResponse
+	-- bubble up the directory tree, looking for an error page to show
+	while true do
+		local errorFilename = `{basePath}/+error.luau`
+		local ok2, isErrorFile = pcall(fs.isFile, errorFilename)
+		if ok2 and isErrorFile then
+			local errok, res = pcall(loadRoute, errorFilename, request, status)
 
-	return self
-end
+			if not errok then
+				warn(res)
+				local newPath = string.match(basePath, "^(.*)/[^/]*$")
+				if newPath == basePath then
+					break
+				end
+				return loadError(newPath, 500, request)
+			end
 
-type Headers = {
-	[string]: string,
-	set: (self: Headers, header: string, value: string) -> nil,
-}
+			logReq(request, status)
 
-type Callback = (
-	body: string,
-	headers: Headers,
-	query: {
-		[string]: string,
+			if type(res) == "string" then
+				return {
+					status = status,
+					body = res,
+				}
+			end
+
+			return res
+		end
+
+		if not basePath then
+			return {
+				status = 500,
+				body = "Internal Server Error",
+			}
+		end
+
+		-- Set newpath to the parent directory
+		local newPath = string.match(basePath, "^(.*)/[^/]*$")
+		if newPath == basePath then
+			break
+		end
+
+		basePath = newPath
+	end
+
+	return {
+		status = status,
+		body = "Not Found",
 	}
-) -> net.ServeResponse
-
---[=[
-	Registers a GET route.
-]=]
-function framework:get(path: string, callback: Callback)
-	return self:_requester("GET", path, callback)
-end
-
---[=[
-	Registers a HEAD route.
-]=]
-function framework:head(path: string, callback: Callback)
-	return self:_requester("HEAD", path, callback)
-end
-
---[=[
-	Registers a POST route.
-]=]
-function framework:post(path: string, callback: Callback)
-	return self:_requester("POST", path, callback)
-end
-
---[=[
-	Registers a PUT route.
-]=]
-function framework:put(path: string, callback: Callback)
-	return self:_requester("PUT", path, callback)
-end
-
---[=[
-	Registers a DELETE route.
-]=]
-function framework:delete(path: string, callback: Callback)
-	return self:_requester("DELETE", path, callback)
-end
-
---[=[
-	Registers a PATCH route.
-]=]
-function framework:patch(path: string, callback: Callback)
-	return self:_requester("PATCH", path, callback)
 end
 
 --[=[
@@ -170,64 +153,58 @@ function framework:listen(port: number)
 
 	net.serve(port, function(request)
 		local path = request.path
-
-		local fileroutes = self._fileroutes
-
-		if fileroutes then
-			for _, route in ipairs(fileroutes) do
-				-- if path starts with route.path
-				if string.sub(path, 1, #route.path) == route.path then
-					local file = fs.readFile(route.filepath .. path)
-					logReq(request, 200)
-					return {
-						status = 200,
-						body = file,
-						headers = request.headers,
-					}
-				end
-			end
+		if string.sub(path, -1) == "/" then
+			path = string.sub(path, 1, -2)
 		end
 
-		local routes = self._routes[path]
+		local public: string = self._public
 
-		if not routes then
-			-- Remove trailing slash
-			if string.sub(path, -1) == "/" then
-				path = string.sub(path, 1, -2)
-			end
-			if not self._routes[path] then
-				logReq(request, 404)
+		if public then
+			local filename = public .. path
+			local ok, readFile = pcall(fs.readFile, filename)
+			if ok then
+				logReq(request, 200)
 				return {
-					status = 404,
-					body = "Not Found",
+					status = 200,
+					body = readFile,
 				}
 			end
 		end
 
-		for _, route in ipairs(routes) do
-			if route.method == request.method then
+		local routes: string = self._routes
+
+		if routes then
+			local basePath = routes .. path
+			local pageFilename = `{basePath}/+page.luau`
+			local ok, isRouteFile = pcall(fs.isFile, pageFilename)
+			if ok and isRouteFile then
+				local routeok, res =
+					pcall(loadRoute, pageFilename, request, 200)
+
+				if not routeok then
+					warn(res)
+					return loadError(basePath, 500, request)
+				end
+
 				logReq(request, 200)
 
-				local result =
-					route.callback(request.body, request.headers, request.query)
-
-				if type(result) == "string" then
+				if type(res) == "string" then
 					return {
 						status = 200,
-						body = result,
-						headers = request.headers,
+						body = res,
 					}
 				end
 
-				-- result is a net.ServeResponse table
-				return result
+				return res
 			end
+
+			return loadError(basePath, 404, request)
 		end
 
-		logReq(request, 405)
+		logReq(request, 404)
 		return {
-			status = 405,
-			body = "Method Not Allowed",
+			status = 404,
+			body = "Not Found",
 		}
 	end)
 end
