@@ -76,7 +76,8 @@ end
 local function loadRoute(
 	filename: string,
 	request: net.ServeRequest,
-	status: number
+	status: number,
+	err: string?
 )
 	local ok, page = pcall(require, filename)
 	if not ok then
@@ -85,30 +86,36 @@ local function loadRoute(
 
 	-- let's do this
 
-	local load = page:load(request, status)
+	local load = page:load(request, status, err)
 
 	return load
 end
 
 local function loadError(
-	basePath: string,
+	basePath: string?,
 	status: number,
-	request: net.ServeRequest
+	request: net.ServeRequest,
+	err: string
 ): net.ServeResponse
+	if not basePath then
+		return {
+			status = status,
+			body = err,
+		}
+	end
+
 	-- bubble up the directory tree, looking for an error page to show
 	while true do
 		local errorFilename = `{basePath}/+error.luau`
 		local ok2, isErrorFile = pcall(fs.isFile, errorFilename)
 		if ok2 and isErrorFile then
-			local errok, res = pcall(loadRoute, errorFilename, request, status)
+			local errok, res =
+				pcall(loadRoute, errorFilename, request, status, err)
 
 			if not errok then
 				warn(res)
 				local newPath = string.match(basePath, "^(.*)/[^/]*$")
-				if newPath == basePath then
-					break
-				end
-				return loadError(newPath, 500, request)
+				return loadError(newPath, 500, request, tostring(res))
 			end
 
 			logReq(request, status)
@@ -124,15 +131,12 @@ local function loadError(
 		end
 
 		if not basePath then
-			return {
-				status = 500,
-				body = "Internal Server Error",
-			}
+			break
 		end
 
 		-- Set newpath to the parent directory
 		local newPath = string.match(basePath, "^(.*)/[^/]*$")
-		if newPath == basePath then
+		if not newPath then
 			break
 		end
 
@@ -140,8 +144,8 @@ local function loadError(
 	end
 
 	return {
-		status = status,
-		body = "Not Found",
+		status = 500,
+		body = "Internal Server Error",
 	}
 end
 
@@ -183,7 +187,7 @@ function framework:listen(port: number)
 
 				if not routeok then
 					warn(res)
-					return loadError(basePath, 500, request)
+					return loadError(basePath, 500, request, tostring(res))
 				end
 
 				logReq(request, 200)
@@ -198,7 +202,7 @@ function framework:listen(port: number)
 				return res
 			end
 
-			return loadError(basePath, 404, request)
+			return loadError(basePath, 404, request, "Not Found")
 		end
 
 		logReq(request, 404)

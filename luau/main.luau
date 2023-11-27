@@ -1,9 +1,11 @@
-local framework = require "framework"
+-- local framework = require "framework"
 
-framework
-	:new({
-		verbose = true,
-	})
-	:public()
-	:routes()
-	:listen(3590)
+local template = require "framework/template"
+
+-- framework
+-- 	:new({
+-- 		verbose = true,
+-- 	})
+-- 	:public()
+-- 	:routes()
+-- 	:listen(3590)
