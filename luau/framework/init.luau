@@ -2,6 +2,8 @@ local fs = require "@lune/fs"
 local net = require "@lune/net"
 local stdio = require "@lune/stdio"
 
+local template = require "template"
+
 local colour = stdio.color
 local write = stdio.write
 
@@ -74,19 +76,101 @@ function framework:routes(filepath: string?)
 end
 
 local function loadRoute(
-	filename: string,
+	path: string,
+	filetype: string, -- "page" | "error" fux up the pcall
 	request: net.ServeRequest,
 	status: number,
 	err: string?
-)
-	local ok, page = pcall(require, filename)
+): net.ServeResponse | string
+	local filename = `{path}/+{filetype}.luau`
+
+	local ok, pageServer: {
+		load: (
+			self: any,
+			request: net.ServeRequest,
+			status: number,
+			err: string?
+		) -> { [string]: any },
+	} =
+		pcall(require, filename)
 	if not ok then
-		error(page)
+		error(pageServer)
 	end
 
 	-- let's do this
+	local load = pageServer:load(request, status, err)
 
-	local load = page:load(request, status, err)
+	local parentFilename = string.match(filename, "^(.*)/[^/]*$")
+
+	-- compile and add +page.tmpl file
+	local pageFilename = `{parentFilename}/+{filetype}.tmpl`
+	local ok2, isPageFile = pcall(fs.isFile, pageFilename)
+
+	if not ok2 then
+		error(isPageFile)
+	end
+
+	local compiledPath = `.compiled{parentFilename}/__{filetype}.luau`
+
+	-- compile the layout template
+	local readok, pageFile = pcall(fs.readFile, pageFilename)
+	if not readok then
+		if filetype == "page" then
+			error(pageFile)
+		end
+		-- error page not found, use default
+		return {
+			status = 500,
+			body = "Internal Server Error",
+		}
+	end
+
+	if not fs.isDir(`.compiled{parentFilename}`) then
+		fs.writeDir(`.compiled{parentFilename}`)
+	end
+
+	fs.writeFile(compiledPath, template.parse(pageFile))
+
+	local pageok, page: (args: { [string]: any }) -> string =
+		pcall(require, compiledPath)
+
+	if not pageok then
+		error(page)
+	end
+
+	load = page(load)
+
+	-- bubble up the directory tree, adding layout files
+	while not err do
+		local layoutFilename = `{parentFilename}/+layout.tmpl`
+		print("reading", layoutFilename)
+		local ok3, isLayoutFile = pcall(fs.isFile, layoutFilename)
+		if ok3 and isLayoutFile then
+			-- compile the layout template
+			local compiledLayoutPath = `.compiled{parentFilename}/__layout.luau`
+
+			fs.writeFile(
+				compiledLayoutPath,
+				template.parse(fs.readFile(layoutFilename), true)
+			)
+
+			local layoutok, layout: (args: { [string]: any }, SLOT: string) -> string =
+				pcall(require, compiledLayoutPath)
+
+			if not layoutok then
+				error(layout)
+			end
+
+			load = layout({}, load)
+		end
+
+		local newPath = string.match(parentFilename, "^(.*)/[^/]*$")
+		if not newPath then
+			break
+		end
+
+		parentFilename = newPath
+	end
 
 	return load
 end
@@ -110,7 +194,7 @@ local function loadError(
 		local ok2, isErrorFile = pcall(fs.isFile, errorFilename)
 		if ok2 and isErrorFile then
 			local errok, res =
-				pcall(loadRoute, errorFilename, request, status, err)
+				pcall(loadRoute, basePath, "error", request, status, err)
 
 			if not errok then
 				warn(res)
@@ -183,7 +267,7 @@ function framework:listen(port: number)
 			local ok, isRouteFile = pcall(fs.isFile, pageFilename)
 			if ok and isRouteFile then
 				local routeok, res =
-					pcall(loadRoute, pageFilename, request, 200)
+					pcall(loadRoute, basePath, "page", request, 200)
 
 				if not routeok then
 					warn(res)
