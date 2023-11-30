@@ -2,11 +2,8 @@
 -- like etlua and penlight.template
 -- not similar to lux or jsx or (sadly) htmlx
 
-local template = {}
-template.__index = template
-
 type Node = {
-	type: "string" | "block" | "interpolation",
+	type: "string" | "block",
 	value: string,
 }
 type Nodes = { Node }
@@ -46,7 +43,7 @@ local function parseTemplate(str)
 			i += 1
 
 			-- End the last block
-			add("string")
+			add "string"
 
 			-- Find the end of the block (#})
 			while i < #str do
@@ -67,12 +64,12 @@ local function parseTemplate(str)
 			end
 
 			-- Add the block to the list
-			add("block")
+			add "block"
 		end
 
 		currentString ..= str[i]
 	end
-	add("string")
+	add "string"
 
 	return list
 end
@@ -81,14 +78,18 @@ local function renderTemplate(list: Nodes, layout: boolean?)
 	local rendered = ""
 
 	for _, node in list do
-		rendered ..= (if node.type == "string"
-			then
-				-- replace newlines with \n
-				`__rendered ..= \`{string.gsub(node.value, "\n", "\\n")}\`\n`
-			else node.value) .. " "
+		-- escape newlines and backticks
+		local value = string.gsub(node.value, "\\", "\\\\")
+		value = string.gsub(value, "\n", "\\n")
+		value = string.gsub(value, "`", "\\`")
+		rendered ..= `{if node.type == "string"
+			then `__rendered ..= \`{value}\`\n`
+			else value} `
 	end
 
-	local initial = if layout then "return function(__args,SLOT)" else "return function(__args)"
+	local initial = if layout
+		then "return function(__args,SLOT)"
+		else "return function(__args)"
 
 	-- god please have mercy on my soul
 	rendered = [[-- Generated framework template
@@ -103,7 +104,7 @@ local __rendered=""
 	return rendered
 end
 
-function template.parse(temp, layout)
+return function(temp, layout)
 	temp = string.gsub(temp, "\r\n", "\n")
 
 	local chars = {}
@@ -114,5 +115,3 @@ function template.parse(temp, layout)
 
 	return renderTemplate(parseTemplate(chars), layout)
 end
-
-return template
