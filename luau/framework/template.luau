@@ -11,14 +11,19 @@ type Node = {
 }
 type Nodes = { Node }
 
-local function trim(str: string)
-	return string.gsub(str, "^%s*(.-)%s*$", "%1")
-end
-
 local function parseTemplate(str)
 	local list: Nodes = {}
 	local currentString = ""
 	local i = 0
+
+	local function add(type)
+		table.insert(list, {
+			type = type,
+			-- trim whitespace
+			value = string.gsub(currentString, "^%s*(.-)%s*$", "%1"),
+		} :: Node)
+		currentString = ""
+	end
 
 	local function next(n)
 		local nextChars = ""
@@ -34,19 +39,14 @@ local function parseTemplate(str)
 		-- Start of a block (#{)
 		if str[i] == "{" and str[i + 1] == "#" then
 			if str[i - 2] == "\\" then
-				currentString = string.sub(currentString, 1, -2)
-				currentString ..= "{#"
+				currentString = string.sub(currentString, 1, -2) .. "{#"
 				continue
 			end
 
 			i += 1
 
 			-- End the last block
-			table.insert(list, {
-				type = "string",
-				value = trim(currentString),
-			} :: Node)
-			currentString = ""
+			add("string")
 
 			-- Find the end of the block (#})
 			while i < #str do
@@ -55,8 +55,7 @@ local function parseTemplate(str)
 				if next(2) == "#}" then
 					if str[i - 1] == "\\" then
 						i += 1
-						currentString = string.sub(currentString, 1, -2)
-						currentString ..= "#}"
+						currentString = string.sub(currentString, 1, -2) .. "#}"
 						continue
 					end
 
@@ -68,19 +67,12 @@ local function parseTemplate(str)
 			end
 
 			-- Add the block to the list
-			table.insert(list, {
-				type = "block",
-				value = trim(currentString),
-			} :: Node)
-			currentString = ""
+			add("block")
 		end
 
 		currentString ..= str[i]
 	end
-	table.insert(list, {
-		type = "string",
-		value = trim(currentString),
-	} :: Node)
+	add("string")
 
 	return list
 end
@@ -92,28 +84,21 @@ local function renderTemplate(list: Nodes, layout: boolean?)
 		rendered ..= (if node.type == "string"
 			then
 				-- replace newlines with \n
-				`__rendered ..= \`{string.gsub(
-					node.value,
-					"\n",
-					"\\n"
-				)}\`\n`
+				`__rendered ..= \`{string.gsub(node.value, "\n", "\\n")}\`\n`
 			else node.value) .. " "
 	end
 
-	local initial = if layout
-		then "return function(__args,SLOT)"
-		else "return function(__args)"
+	local initial = if layout then "return function(__args,SLOT)" else "return function(__args)"
 
 	-- god please have mercy on my soul
-	rendered = initial
-		.. [=[
+	rendered = [[-- Generated framework template
+-- modify at your own risk
+]] .. initial .. [=[
 local env=getfenv(0)
 for i,v in pairs(__args) do env[i]=v end
 setfenv(0,env)
 local __rendered=""
-]=]
-		.. rendered
-		.. "return __rendered end"
+]=] .. rendered .. "return __rendered end"
 
 	return rendered
 end

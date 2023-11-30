@@ -36,7 +36,7 @@ function framework:_log(colourName: stdio.Color?, message: string)
 	)
 end
 
-function logReq(request: net.ServeRequest, status: number)
+local function logReq(request: net.ServeRequest, status: number)
 	local method = request.method
 	local path = request.path
 
@@ -75,6 +75,8 @@ function framework:routes(filepath: string?)
 	return self
 end
 
+type Data = { [string]: any }
+
 local function loadRoute(
 	path: string,
 	filetype: string, -- "page" | "error" fux up the pcall
@@ -82,51 +84,93 @@ local function loadRoute(
 	status: number,
 	err: string?
 ): net.ServeResponse | string
-	local filename = `{path}/+{filetype}.luau`
+	local filename = `{path}/+page.luau`
 
-	local ok, pageServer: {
-		load: (
-			self: any,
-			request: net.ServeRequest,
-			status: number,
-			err: string?
-		) -> { [string]: any },
-	} =
-		pcall(require, filename)
-	if not ok then
-		error(pageServer)
+	local load: Data
+
+	if filetype == "page" then
+		local ok, pageServer: {
+			load: (
+				self: any,
+				request: net.ServeRequest,
+				status: number,
+				err: string?
+			) -> Data,
+		} =
+			pcall(require, filename)
+		if not ok then
+			error(pageServer)
+		end
+
+		-- let's do this
+		load = pageServer:load(request, status, err)
+	else
+		load = {
+			status = status,
+			err = err,
+		}
 	end
 
-	-- let's do this
-	local load = pageServer:load(request, status, err)
-
-	local parentFilename = string.match(filename, "^(.*)/[^/]*$")
-
 	-- compile and add +page.tmpl file
-	local pageFilename = `{parentFilename}/+{filetype}.tmpl`
+	local pageFilename = `{path}/+{filetype}.tmpl`
 	local ok2, isPageFile = pcall(fs.isFile, pageFilename)
 
 	if not ok2 then
 		error(isPageFile)
 	end
 
-	local compiledPath = `.compiled{parentFilename}/__{filetype}.luau`
+	local compiledPath = `.compiled{path}/__{filetype}.luau`
 
 	-- compile the layout template
 	local readok, pageFile = pcall(fs.readFile, pageFilename)
 	if not readok then
-		if filetype == "page" then
-			error(pageFile)
+		if filetype == "error" then
+			-- bubble up the directory tree, looking for an error template
+			while true do
+				local errorFilename = `{path}/+error.tmpl`
+				local ok3, isErrorFile = pcall(fs.isFile, errorFilename)
+				if ok3 and isErrorFile then
+					-- compile the layout template
+					local compiledLayoutPath = `.compiled{path}/__error.luau`
+
+					fs.writeFile(
+						compiledLayoutPath,
+						template.parse(fs.readFile(errorFilename), true)
+					)
+
+					local layoutok, layout: (args: Data, SLOT: string) -> string =
+						pcall(require, compiledLayoutPath)
+
+					if not layoutok then
+						error(layout)
+					end
+
+					return layout(load, "body")
+				end
+
+				local newPath = string.match(path, "^(.*)/[^/]*$")
+				if not newPath then
+					print "using default error template"
+					pageFile = [[{status} {err}]]
+					break
+				end
+
+				path = newPath
+			end
 		end
-		-- error page not found, use default
-		return {
-			status = 500,
-			body = "Internal Server Error",
-		}
 	end
 
-	if not fs.isDir(`.compiled{parentFilename}`) then
-		fs.writeDir(`.compiled{parentFilename}`)
+	-- create each directory in the path if it doesn't exist
+	local currentPath = ""
+	for dir in string.gmatch(compiledPath, "[^/]+") do
+		-- don't create the last part of the path
+		if dir == `__{filetype}.luau` then
+			break
+		end
+		currentPath ..= dir .. "/"
+		if not fs.isDir(currentPath) then
+			fs.writeDir(currentPath)
+		end
 	end
 
 	fs.writeFile(compiledPath, template.parse(pageFile))
@@ -135,102 +179,51 @@ local function loadRoute(
 		pcall(require, compiledPath)
 
 	if not pageok then
-		error(page)
+		if filetype == "error" then
+			load = {
+				status = status,
+				error = err,
+			}
+		else
+			error(page)
+		end
 	end
 
-	load = page(load)
+	local templated = page(load)
 
 	-- bubble up the directory tree, adding layout files
-	while not err do
-		local layoutFilename = `{parentFilename}/+layout.tmpl`
+	while true do
+		local layoutFilename = `{path}/+layout.tmpl`
 		print("reading", layoutFilename)
 		local ok3, isLayoutFile = pcall(fs.isFile, layoutFilename)
 		if ok3 and isLayoutFile then
 			-- compile the layout template
-			local compiledLayoutPath = `.compiled{parentFilename}/__layout.luau`
+			local compiledLayoutPath = `.compiled{path}/__layout.luau`
 
 			fs.writeFile(
 				compiledLayoutPath,
 				template.parse(fs.readFile(layoutFilename), true)
 			)
 
-			local layoutok, layout: (args: { [string]: any }, SLOT: string) -> string =
+			local layoutok, layout: (args: Data, SLOT: string) -> string =
 				pcall(require, compiledLayoutPath)
 
 			if not layoutok then
 				error(layout)
 			end
 
-			load = layout({}, load)
+			templated = layout({}, templated)
 		end
 
-		local newPath = string.match(parentFilename, "^(.*)/[^/]*$")
+		local newPath = string.match(path, "^(.*)/[^/]*$")
 		if not newPath then
 			break
 		end
 
-		parentFilename = newPath
+		path = newPath
 	end
 
-	return load
-end
-
-local function loadError(
-	basePath: string?,
-	status: number,
-	request: net.ServeRequest,
-	err: string
-): net.ServeResponse
-	if not basePath then
-		return {
-			status = status,
-			body = err,
-		}
-	end
-
-	-- bubble up the directory tree, looking for an error page to show
-	while true do
-		local errorFilename = `{basePath}/+error.luau`
-		local ok2, isErrorFile = pcall(fs.isFile, errorFilename)
-		if ok2 and isErrorFile then
-			local errok, res =
-				pcall(loadRoute, basePath, "error", request, status, err)
-
-			if not errok then
-				warn(res)
-				local newPath = string.match(basePath, "^(.*)/[^/]*$")
-				return loadError(newPath, 500, request, tostring(res))
-			end
-
-			logReq(request, status)
-
-			if type(res) == "string" then
-				return {
-					status = status,
-					body = res,
-				}
-			end
-
-			return res
-		end
-
-		if not basePath then
-			break
-		end
-
-		-- Set newpath to the parent directory
-		local newPath = string.match(basePath, "^(.*)/[^/]*$")
-		if not newPath then
-			break
-		end
-
-		basePath = newPath
-	end
-
-	return {
-		status = 500,
-		body = "Internal Server Error",
-	}
+	return templated
 end
 
 --[=[
@@ -271,7 +264,13 @@ function framework:listen(port: number)
 
 				if not routeok then
 					warn(res)
-					return loadError(basePath, 500, request, tostring(res))
+					return loadRoute(
+						basePath,
+						"error",
+						request,
+						500,
+						tostring(res)
+					)
 				end
 
 				logReq(request, 200)
@@ -286,7 +285,7 @@ function framework:listen(port: number)
 				return res
 			end
 
-			return loadError(basePath, 404, request, "Not Found")
+			return loadRoute(basePath, "error", request, 404, "Not Found")
 		end
 
 		logReq(request, 404)
