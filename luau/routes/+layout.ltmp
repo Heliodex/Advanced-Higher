@@ -13,6 +13,14 @@
 			<a href="/testing">Testing</a>
 			<a href="/testing/beu">Test404</a>
 		</nav>
+		<ul>
+			{# for i = 1, 3 do #}
+				<li>This is a test!</li>
+				{# for j = 1, 3 do #}
+					<li>{i} + {j} = {i + j}</li>
+				{# end #}
+			{# end #}
+		</ul>
 		{SLOT}
 	</body>
 </html>

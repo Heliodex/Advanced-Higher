@@ -1,0 +1,41 @@
+{
+	"name": "luau-templating",
+	"displayName": "Luau Templating",
+	"description": "Support for Luau templating language",
+	"version": "0.0.1",
+	"scripts": {
+		"test": "vscode-test"
+	},
+	"engines": {
+		"vscode": "^1.84.0"
+	},
+	"categories": [
+		"Programming Languages"
+	],
+	"contributes": {
+		"languages": [
+			{
+				"id": "ltmp",
+				"aliases": [
+					"Luau Template",
+					"ltmp"
+				],
+				"extensions": [
+					".ltmp"
+				],
+				"configuration": "./language-configuration.json"
+			}
+		],
+		"grammars": [
+			{
+				"language": "ltmp",
+				"scopeName": "source.ltmp",
+				"path": "./syntaxes/ltmp.tmLanguage.json"
+			}
+		]
+	},
+	"devDependencies": {
+		"@vscode/test-cli": "^0.0.4",
+		"@vscode/test-electron": "^2.3.8"
+	}
+}

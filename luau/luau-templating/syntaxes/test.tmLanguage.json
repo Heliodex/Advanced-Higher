@@ -1,0 +1,153 @@
+{
+	"name": "HTML (Lua - etlua)",
+	"uuid": "ac3139e6-a9b0-4b0c-aaab-10d95ff79d97",
+	"scopeName": "text.html.etlua",
+	"fileTypes": ["etlua", "html.etlua"],
+	"injections": {
+		"text.html.etlua - (meta.embedded.block.etlua | meta.embedded.line.etlua | comment)": {
+			"patterns": [
+				{
+					"begin": "(^\\s*)(?=<%+#(?![^%]*%>))",
+					"beginCaptures": {
+						"0": {
+							"name": "punctuation.whitespace.comment.leading.etlua"
+						}
+					},
+					"end": "(?!\\G)(\\s*$\\n)?",
+					"endCaptures": {
+						"0": {
+							"name": "punctuation.whitespace.comment.trailing.etlua"
+						}
+					},
+					"patterns": [
+						{
+							"include": "#comment"
+						}
+					]
+				},
+				{
+					"begin": "(^\\s*)(?=<%(?![^%]*%>))",
+					"beginCaptures": {
+						"0": {
+							"name": "punctuation.whitespace.embedded.leading.etlua"
+						}
+					},
+					"end": "(?!\\G)(\\s*$\\n)?",
+					"endCaptures": {
+						"0": {
+							"name": "punctuation.whitespace.embedded.trailing.etlua"
+						}
+					},
+					"patterns": [
+						{
+							"include": "#tags"
+						}
+					]
+				},
+				{
+					"include": "#comment"
+				},
+				{
+					"include": "#tags"
+				}
+			]
+		}
+	},
+	"keyEquivalent": "^~H",
+	"patterns": [
+		{
+			"include": "text.html.basic"
+		}
+	],
+	"repository": {
+		"comment": {
+			"patterns": [
+				{
+					"name": "comment.block.etlua",
+					"begin": "<%+#",
+					"beginCaptures": {
+						"0": {
+							"name": "punctuation.definition.comment.begin.etlua"
+						}
+					},
+					"end": "%>",
+					"endCaptures": {
+						"0": {
+							"name": "punctuation.definition.comment.end.etlua"
+						}
+					}
+				}
+			]
+		},
+		"tags": {
+			"patterns": [
+				{
+					"name": "meta.embedded.block.etlua",
+					"contentName": "source.lua",
+					"begin": "<%+(?!>)[-=]?(?![^%]*%>)",
+					"beginCaptures": {
+						"0": {
+							"name": "punctuation.section.embedded.begin.etlua"
+						}
+					},
+					"end": "(-?%)>",
+					"endCaptures": {
+						"0": {
+							"name": "punctuation.section.embedded.end.etlua"
+						},
+						"1": {
+							"name": "source.lua"
+						}
+					},
+					"patterns": [
+						{
+							"name": "comment.line.number-sign.etlua",
+							"match": "(#).*?(?=-?%>)",
+							"captures": {
+								"1": {
+									"name": "punctuation.definition.comment.etlua"
+								}
+							}
+						},
+						{
+							"include": "source.lua"
+						}
+					]
+				},
+				{
+					"name": "meta.embedded.line.etlua",
+					"contentName": "source.lua",
+					"begin": "<%+(?!>)[-=]?",
+					"beginCaptures": {
+						"0": {
+							"name": "punctuation.section.embedded.begin.etlua"
+						}
+					},
+					"end": "(-?%)>",
+					"endCaptures": {
+						"0": {
+							"name": "punctuation.section.embedded.end.etlua"
+						},
+						"1": {
+							"name": "source.lua"
+						}
+					},
+					"patterns": [
+						{
+							"name": "comment.line.number-sign.etlua",
+							"match": "(#).*?(?=-?%>)",
+							"captures": {
+								"1": {
+									"name": "punctuation.definition.comment.etlua"
+								}
+							}
+						},
+						{
+							"include": "source.lua"
+						}
+					]
+				}
+			]
+		}
+	}
+}

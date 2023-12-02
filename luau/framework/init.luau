@@ -83,7 +83,7 @@ local function createFile(path, contents)
 		if dir == string.match(path, "^.*/([^/]*)$") then
 			break
 		end
-		currentPath ..= `{dir}/"`
+		currentPath ..= `{dir}/`
 		if not fs.isDir(currentPath) then
 			fs.writeDir(currentPath)
 		end
@@ -128,8 +128,8 @@ local function loadRoute(
 		}
 	end
 
-	-- compile and add +page.tmpl file
-	local pageFilename = `{path}/+{filetype}.tmpl`
+	-- compile and add +page.ltmp file
+	local pageFilename = `{path}/+{filetype}.ltmp`
 	local ok, isPageFile = pcall(fs.isFile, pageFilename)
 
 	if not ok then
@@ -145,7 +145,7 @@ local function loadRoute(
 		if filetype == "error" then
 			-- bubble up the directory tree, looking for an error template
 			while true do
-				local errorFilename = `{path}/+error.tmpl`
+				local errorFilename = `{path}/+error.ltmp`
 				local ok2, isErrorFile = pcall(fs.isFile, errorFilename)
 				if ok2 and isErrorFile then
 					-- compile the layout template
@@ -200,7 +200,7 @@ local function loadRoute(
 
 	-- bubble up the directory tree, adding layout files
 	while true do
-		local layoutFilename = `{path}/+layout.tmpl`
+		local layoutFilename = `{path}/+layout.ltmp`
 		print("reading", layoutFilename)
 		local ok3, isLayoutFile = pcall(fs.isFile, layoutFilename)
 		if ok3 and isLayoutFile then
