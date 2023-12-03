@@ -3,6 +3,7 @@ local net = require "@lune/net"
 local stdio = require "@lune/stdio"
 
 local template = require "template"
+local compile = require "compile"
 
 local colour = stdio.color
 local write = stdio.write
@@ -92,7 +93,7 @@ local function createFile(path, contents)
 	fs.writeFile(`{path}.luau`, contents)
 end
 
-type Data = { [string]: any }
+export type Data = { [string]: any }
 
 local function loadRoute(
 	path: string,
@@ -102,10 +103,9 @@ local function loadRoute(
 	err: string?
 ): net.ServeResponse | string
 	local filename = `{path}/+page`
-
 	local load: Data
 
-	if filetype == "page" then
+	if filetype == "+page" then
 		local ok, pageServer: {
 			load: (
 				self: any,
@@ -115,12 +115,8 @@ local function loadRoute(
 			) -> Data,
 		} =
 			pcall(require, filename)
-		if not ok then
-			error(pageServer)
-		end
 
-		-- let's do this
-		load = pageServer:load(request, status, err)
+		load = if ok then pageServer:load(request, status, err) else {}
 	else
 		load = {
 			status = status,
@@ -128,90 +124,80 @@ local function loadRoute(
 		}
 	end
 
+	print("load", load)
+
 	-- compile and add +page.ltmp file
-	local pageFilename = `{path}/+{filetype}.ltmp`
+	local pageFilename = `{path}/{filetype}.ltmp`
 	local ok, isPageFile = pcall(fs.isFile, pageFilename)
 
 	if not ok then
 		error(isPageFile)
 	end
 
-	local compiledPath = `.compiled{path}/_{filetype}`
+	local compiledPath = `.compiled{path}/{filetype}`
 
 	-- compile the layout template
 	local templated
 	local readok, pageFile = pcall(fs.readFile, pageFilename)
+
 	if not readok then
-		if filetype == "error" then
-			-- bubble up the directory tree, looking for an error template
-			while true do
-				local errorFilename = `{path}/+error.ltmp`
-				local ok2, isErrorFile = pcall(fs.isFile, errorFilename)
-				if ok2 and isErrorFile then
-					-- compile the layout template
-					local compiledLayoutPath = `.compiled{path}/_error`
+		-- bubble up the directory tree, looking for an error template
+		while true do
+			local compiledErrorPath = compile(path, "+error")
 
-					createFile(
-						compiledLayoutPath,
-						template(fs.readFile(errorFilename), true)
-					)
+			if compiledErrorPath then
+				local ok2, layout: (args: Data, SLOT: string) -> string =
+					pcall(require, compiledErrorPath)
 
-					local ok3, layout: (args: Data, SLOT: string) -> string =
-						pcall(require, compiledLayoutPath)
-
-					if not ok3 then
-						error(layout)
-					end
-
-					templated = layout(load, "body")
-					break
+				if not ok2 then
+					error(layout) -- yes, this is needed
 				end
 
-				local newPath = string.match(path, "^(.*)/[^/]*$")
-				if not newPath then
-					templated = `{status} {err}`
-					break
-				end
-
-				path = newPath
+				templated = layout(load, "body")
+				break
 			end
+
+			local newPath = string.match(path, "^(.*)/[^/]*$")
+			if not newPath then
+				templated = `{status} {err}`
+				break
+			end
+
+			path = newPath
 		end
 	end
 
 	if not templated then
-		createFile(compiledPath, template(pageFile))
+		print("no template", pageFilename)
+		local pageok, page: (args: Data) -> string
 
-		local pageok, page: (args: Data) -> string =
-			pcall(require, compiledPath)
+		local templateok, compiled = pcall(template, pageFile)
+
+		if templateok then
+			createFile(compiledPath, compiled)
+
+			pageok, page = pcall(require, compiledPath)
+		end
 
 		if not pageok then
-			if filetype == "error" then
+			if filetype == "+error" then
 				load = {
 					status = status,
 					error = err,
 				}
 			else
-				error(page)
+				templated = `{status} {err}`
 			end
+		else
+			templated = page(load)
 		end
-
-		templated = page(load)
 	end
 
 	-- bubble up the directory tree, adding layout files
 	while true do
-		local layoutFilename = `{path}/+layout.ltmp`
-		print("reading", layoutFilename)
-		local ok3, isLayoutFile = pcall(fs.isFile, layoutFilename)
-		if ok3 and isLayoutFile then
-			-- compile the layout template
-			local compiledLayoutPath = `.compiled{path}/_layout`
+		local compiledLayoutPath = compile(path, "+layout")
 
-			createFile(
-				compiledLayoutPath,
-				template(fs.readFile(layoutFilename), true)
-			)
-
+		if compiledLayoutPath then
 			local layoutok, layout: (args: Data, SLOT: string) -> string =
 				pcall(require, compiledLayoutPath)
 
@@ -266,17 +252,17 @@ function framework:listen(port: number)
 
 		if routes then
 			local basePath = routes .. path
-			local pageFilename = `{basePath}/+page.luau`
+			local pageFilename = `{basePath}/+page.ltmp`
 			local ok, isRouteFile = pcall(fs.isFile, pageFilename)
 			if ok and isRouteFile then
 				local routeok, res =
-					pcall(loadRoute, basePath, "page", request, 200)
+					pcall(loadRoute, basePath, "+page", request, 200)
 
 				if not routeok then
 					warn(res)
 					return loadRoute(
 						basePath,
-						"error",
+						"+error",
 						request,
 						500,
 						tostring(res)

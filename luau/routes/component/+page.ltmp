@@ -1,0 +1,15 @@
+{#
+	local component = require "../../framework/component"
+#}
+
+This is a page with a component!
+
+<div class="component">
+	{component "components/Component" { count = 1 }}
+</div>
+
+<style>
+	.component \\{
+		padding-top: 1rem;
+	}
+</style>

@@ -79,12 +79,16 @@ local function renderTemplate(list: Nodes, layout: boolean?)
 
 	for _, node in list do
 		-- escape newlines and backticks
-		local value = string.gsub(node.value, "\\", "\\\\")
-		value = string.gsub(value, "\n", "\\n")
+		local value = node.value
+		value = string.gsub(value, "\\\\{", "\\{")
 		value = string.gsub(value, "`", "\\`")
-		rendered ..= `{if node.type == "string"
-			then `__rendered ..= \`{value}\`\n`
-			else value} `
+
+		if node.type == "string" then
+			value = string.gsub(value, "\n", "\\n")
+			rendered ..= `__rendered ..= \`{value}\`\n`
+		else
+			rendered ..= `{value} `
+		end
 	end
 
 	local initial = if layout
@@ -92,16 +96,14 @@ local function renderTemplate(list: Nodes, layout: boolean?)
 		else "return function(__args)"
 
 	-- god please have mercy on my soul
-	rendered = [[-- Generated framework template
--- modify at your own risk
-]] .. initial .. [=[
+	return [[-- Generated framework template
+-- modify at your own peril
+]] .. initial .. [[
 local env=getfenv(0)
-for i,v in pairs(__args) do env[i]=v end
+for i,v in pairs(__args or {}) do env[i]=v end
 setfenv(0,env)
 local __rendered=""
-]=] .. rendered .. "return __rendered end"
-
-	return rendered
+]] .. rendered .. "return __rendered end"
 end
 
 return function(temp, layout)

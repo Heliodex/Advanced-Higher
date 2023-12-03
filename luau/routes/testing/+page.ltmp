@@ -1,5 +1,13 @@
 <ul>
-	{# for _ = 1, 3 do #}
-		<li>This is a test! {thing} {place}!</li>
+	{# for i = 1, 5 do #}
+		{# for j = 1, i do #}
+			<li>{i} + {j} = {i + j}</li>
+		{# end #}
 	{# end #}
 </ul>
+
+<style>
+	li \\{
+		color: red;
+	}
+</style>
