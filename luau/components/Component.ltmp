@@ -1,11 +1,11 @@
 {#
-	local component = require "../../framework/component"
+	local load = require "../../framework/component"
 #}
 
 Recursive component {count}
 
 {# if count < 5 then #}
 	<div style="padding-left: 1rem">
-		{component "components/Component" { count = count + 1 }}
+		{load "components/Component" { count = count + 1 }}
 	</div>
 {# end #}

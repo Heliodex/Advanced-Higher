@@ -21,7 +21,6 @@ end
 
 return function(path: string, filetype: string): string?
 	local filename = `{path}/{filetype}.ltmp`
-	print("reading", filename)
 	local ok, isFile = pcall(fs.isFile, filename)
 	if not (ok and isFile) then
 		return

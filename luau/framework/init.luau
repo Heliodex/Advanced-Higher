@@ -104,27 +104,54 @@ local function loadRoute(
 ): net.ServeResponse | string
 	local filename = `{path}/+page`
 	local load: Data
+	local method = request.method
 
 	if filetype == "+page" then
 		local ok, pageServer: {
-			load: (
+			load: ((
 				self: any,
 				request: net.ServeRequest,
 				status: number,
 				err: string?
-			) -> Data,
+			) -> Data)?,
+			actions: {
+				[string]: (
+					request: net.ServeRequest
+				) -> net.ServeResponse | string,
+			}?,
 		} =
 			pcall(require, filename)
 
-		load = if ok then pageServer:load(request, status, err) else {}
+		if method == "GET" then
+			load = if ok and pageServer.load
+				-- method call (:) fux up
+				then pageServer.load(pageServer, request, status, err)
+				else {}
+		elseif method == "POST" and ok and pageServer.actions then
+			local action = request.query[""] or "default"
+			local actionFunc = pageServer.actions[action]
+
+			print("calling action", action)
+
+			if actionFunc then
+				return actionFunc(request)
+			end
+			return {
+				status = 405,
+				body = "405 Method Not Allowed",
+			}
+		else
+			return {
+				status = 405,
+				body = "405 Method Not Allowed",
+			}
+		end
 	else
 		load = {
 			status = status,
 			err = err,
 		}
 	end
-
-	print("load", load)
 
 	-- compile and add +page.ltmp file
 	local pageFilename = `{path}/{filetype}.ltmp`
@@ -168,9 +195,7 @@ local function loadRoute(
 	end
 
 	if not templated then
-		print("no template", pageFilename)
 		local pageok, page: (args: Data) -> string
-
 		local templateok, compiled = pcall(template, pageFile)
 
 		if templateok then
@@ -230,6 +255,7 @@ function framework:listen(port: number)
 
 	net.serve(port, function(request)
 		local path = request.path
+		-- Trim trailing slash
 		if string.sub(path, -1) == "/" then
 			path = string.sub(path, 1, -2)
 		end
@@ -288,7 +314,7 @@ function framework:listen(port: number)
 		logReq(request, 404)
 		return {
 			status = 404,
-			body = "Not Found",
+			body = "404 Not Found",
 		}
 	end)
 end
