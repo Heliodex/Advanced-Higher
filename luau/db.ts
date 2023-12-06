@@ -1,30 +1,30 @@
-import Database from "bun:sqlite"
+import { Client } from "https://deno.land/x/mysql@v2.12.1/mod.ts"
 
-const db = new Database("db.sqlite3", { create: true })
-
-Bun.serve({
-	port: 3307,
-	async fetch(req) {
-		if (req.method != "POST")
-			return new Response("Method Not Allowed", { status: 405 })
-
-		try {
-			const block = await req.json(),
-				params: any[] = block?.params,
-				query = db.query(block.query),
-				result = query.get(...(params || []))
-
-				console.log(query.toString())
-
-			return new Response(JSON.stringify(result), {
-				headers: {
-					"Content-Type": "application/json",
-				},
-			})
-		} catch (e: any) {
-			return new Response(e.message, { status: 400 })
-		}
-	},
+const client = await new Client().connect({
+	hostname: "localhost",
+	username: "root",
+	password: "root",
 })
 
-console.log("serving")
+// Because Lune can't access the database over only http
+
+Deno.serve({ port: 3307 }, async req => {
+	if (req.method != "POST")
+		return new Response("Method not allowed", { status: 405 })
+
+	const body = await req.json(),
+		query: string = body.query,
+		params: (number | string)[] | undefined = body?.params
+
+	try {
+		const result = await client.execute(query, params)
+
+		return new Response(JSON.stringify(result, null, 2), {
+			headers: { "content-type": "application/json" },
+		})
+	} catch (e) {
+		return new Response(JSON.stringify({
+			error: e.message,
+		}), { status: 400 })
+	}
+})
