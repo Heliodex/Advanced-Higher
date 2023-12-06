@@ -127,6 +127,11 @@ local function loadRoute(
 				-- method call (:) fux up
 				then pageServer.load(pageServer, request, status, err)
 				else {}
+
+			if load._raw == true then
+				load._raw = nil
+				return load
+			end
 		elseif method == "POST" and ok and pageServer.actions then
 			local action = request.query[""] or "default"
 			local actionFunc = pageServer.actions[action]

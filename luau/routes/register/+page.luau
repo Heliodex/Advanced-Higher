@@ -40,23 +40,24 @@ page.actions = {
 		local password = string.match(request.body, "password=([^&]+)")
 
 		if not username or not password then
-			return redirect(302, "/login#incorrect")
+			return redirect(302, "/register#invalid")
 		end
 
-		local user = db:query(
-			"SELECT * FROM user WHERE username = ? AND password = ?",
-			{ username, password }
-		)[1]
+		local user =
+			db:query("SELECT * FROM user WHERE username = ?", { username })
 
-		print("user", user)
-
-		if not user then
-			return redirect(302, "/login#incorrect")
+		if user[1] then
+			return redirect(302, "/register#taken")
 		end
 
 		local newCookie = utils.randomString(64)
 
-				db:query("INSERT INTO session (id, username) VALUES (?, ?)", {
+		-- cant be bothered to hash passwords
+		db:query("INSERT INTO user (username, password) VALUES (?, ?)", {
+			username,
+			password,
+		})
+		db:query("INSERT INTO session (id, username) VALUES (?, ?)", {
 			newCookie,
 			username,
 		})

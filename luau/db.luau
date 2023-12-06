@@ -16,8 +16,6 @@ function db:query(query: string, params: { (string | number) }?)
 
 	local body = net.jsonDecode(res.body)
 
-	print("body", body)
-
 	return if body.rows then body.rows else body
 end
 
