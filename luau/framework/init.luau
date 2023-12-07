@@ -2,8 +2,9 @@ local fs = require "@lune/fs"
 local net = require "@lune/net"
 local stdio = require "@lune/stdio"
 
-local template = require "template"
 local compile = require "compile"
+local template = require "template"
+local utils = require "utils"
 
 local colour = stdio.color
 local write = stdio.write
@@ -14,6 +15,7 @@ local purple = colour "purple"
 local red = colour "red"
 local reset = colour "reset"
 local yellow = colour "yellow"
+local cyan = colour "cyan"
 
 --[=[
 	Framework description
@@ -37,7 +39,8 @@ function framework:_log(colourName: stdio.Color?, message: string)
 	)
 end
 
-local function logReq(request: net.ServeRequest, status: number)
+local function logReq(request: net.ServeRequest, status: number, time: number)
+	local timeTaken = math.round((os.clock() - time) * 1000000)
 	local method = request.method
 	local path = request.path
 
@@ -57,7 +60,17 @@ local function logReq(request: net.ServeRequest, status: number)
 		elseif method == "DELETE" then red .. method
 		else method
 
-	print(`[{colouredStatus}{reset}]`, colouredMethod, reset, path)
+	print(
+		`[{colouredStatus}{reset}]`,
+		colouredMethod,
+		reset,
+		path,
+		cyan,
+		if timeTaken > 1000
+			then `({math.round(timeTaken / 1000)}ms)`
+			else `({timeTaken}µs)`,
+		reset
+	)
 end
 
 --[=[
@@ -167,6 +180,39 @@ local function loadRoute(
 	end
 
 	local compiledPath = `.compiled{path}/{filetype}`
+	local layoutPath = path
+
+	-- bubble up the directory tree, adding +layout.luau files
+	while true do
+		local ok2, layoutServer: {
+			load: ((
+				self: any,
+				request: net.ServeRequest,
+				status: number,
+				err: string?
+			) -> Data)?,
+		} =
+			pcall(require, `{layoutPath}/+layout`)
+
+		if ok2 and layoutServer.load then
+			local layoutLoad =
+				layoutServer.load(layoutServer, request, status, err)
+
+			if layoutLoad._raw == true then
+				layoutLoad._raw = nil
+				return layoutLoad
+			end
+
+			-- merge the layout's load with the existing load
+			-- existing load (further down the tree) takes priority
+			load = utils.merge(layoutLoad, load)
+		end
+
+		layoutPath = string.match(layoutPath, "^(.*)/[^/]*$")
+		if not layoutPath then
+			break
+		end
+	end
 
 	-- compile the layout template
 	local templated
@@ -175,6 +221,7 @@ local function loadRoute(
 	if not readok then
 		-- bubble up the directory tree, looking for an error template
 		while true do
+			print("compiling error template", path)
 			local compiledErrorPath = compile(path, "+error")
 
 			if compiledErrorPath then
@@ -252,6 +299,58 @@ local function loadRoute(
 	}
 end
 
+local function getRoutePath(path: string)
+	-- check if "routes/testing/beu/+page.ltmp" exists,
+	-- but also check if "routes/(layout)/testing/beu" exists
+	-- (layouts are enclosed in parentheses)
+
+	-- split the path into parts
+	local parts = {}
+	for part in string.gmatch(path, "[^/]+") do
+		table.insert(parts, part)
+	end
+
+	for i = #parts, 1, -1 do
+		-- get the first x parts of the path, and check if it exists
+		local newPath = table.concat(parts, "/", 1, i)
+		local ok, pathExists = pcall(fs.isDir, newPath)
+
+		if ok and pathExists then
+			continue
+		end
+
+		-- the path doesn't exist, let's do some sleuthing
+
+		newPath = table.concat(parts, "/", 1, i - 1)
+
+		local possibleLayouts = {}
+		for _, entry in fs.readDir(newPath) do
+			if string.match(entry, "^%(.+%)$") then
+				table.insert(possibleLayouts, entry)
+			end
+		end
+
+		if #possibleLayouts == 0 then
+			-- no layouts found, path aint there
+			return
+		end
+
+		-- for each possible layout, check if the next part of the path exists
+		for _, layout in possibleLayouts do
+			local layoutPath = getRoutePath(
+				table.concat({ newPath, layout, table.unpack(parts, i) }, "/")
+			)
+			if layoutPath then
+				return layoutPath
+			end
+		end
+
+		return
+	end
+
+	return table.concat(parts, "/")
+end
+
 --[=[
 	Listens on the specified port.
 ]=]
@@ -259,19 +358,18 @@ function framework:listen(port: number)
 	self:_log("green", `Listening on http://localhost:{port}/`)
 
 	net.serve(port, function(request)
+		local startTime = os.clock()
 		local path = request.path
 		-- Trim trailing slash
 		if string.sub(path, -1) == "/" then
 			path = string.sub(path, 1, -2)
 		end
 
-		local public: string = self._public
-
-		if public then
-			local filename = public .. path
+		if self._public then
+			local filename = self._public .. path
 			local ok, readFile = pcall(fs.readFile, filename)
 			if ok then
-				logReq(request, 200)
+				logReq(request, 200, startTime)
 				return {
 					status = 200,
 					body = readFile,
@@ -279,20 +377,25 @@ function framework:listen(port: number)
 			end
 		end
 
-		local routes: string = self._routes
+		if self._routes then
+			local basePath = self._routes .. path
+			local gotPath = getRoutePath(basePath)
+			gotPath = gotPath or basePath
 
-		if routes then
-			local basePath = routes .. path
-			local pageFilename = `{basePath}/+page.ltmp`
-			local ok, isRouteFile = pcall(fs.isFile, pageFilename)
-			if ok and isRouteFile then
+			local routePageFilename = `{gotPath}/+page.ltmp`
+			local routeServerFilename = `{gotPath}/+page.luau`
+
+			local pageOk, isRoutePage = pcall(fs.isFile, routePageFilename)
+			local serverOk, isRouteServer =
+				pcall(fs.isFile, routeServerFilename)
+			if (pageOk and isRoutePage) or (serverOk and isRouteServer) then
 				local routeok, res =
-					pcall(loadRoute, basePath, "+page", request, 200)
+					pcall(loadRoute, gotPath, "+page", request, 200)
 
 				if not routeok then
 					warn(res)
 					return loadRoute(
-						basePath,
+						gotPath,
 						"+error",
 						request,
 						500,
@@ -300,9 +403,10 @@ function framework:listen(port: number)
 					)
 				end
 
-				logReq(request, 200)
+				logReq(request, 200, startTime)
 
 				if type(res) == "string" then
+					-- otherwise headers are ignored or something idk
 					return {
 						status = 200,
 						body = res,
@@ -312,11 +416,11 @@ function framework:listen(port: number)
 				return res
 			end
 
-			logReq(request, 404)
-			return loadRoute(basePath, "error", request, 404, "Not Found")
+			logReq(request, 404, startTime)
+			return loadRoute(gotPath, "error", request, 404, "Not Found")
 		end
 
-		logReq(request, 404)
+		logReq(request, 404, startTime)
 		return {
 			status = 404,
 			body = "404 Not Found",

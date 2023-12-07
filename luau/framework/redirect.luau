@@ -1,17 +1,5 @@
 local net = require "@lune/net"
-
-local function merge(t1: { [string]: any }, t2: { [string]: any })
-	local t3 = {}
-
-	for k, v in t1 do
-		t3[k] = v
-	end
-	for k, v in t2 do
-		t3[k] = v
-	end
-
-	return t3
-end
+local utils = require "utils"
 
 return function(
 	status: number,
@@ -21,7 +9,7 @@ return function(
 	return {
 		_raw = true,
 		status = status,
-		headers = merge({
+		headers = utils.merge({
 			Location = path,
 		}, headers or {}),
 	}

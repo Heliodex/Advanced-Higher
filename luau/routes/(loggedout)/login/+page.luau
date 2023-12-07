@@ -1,24 +1,8 @@
 local net = require "@lune/net"
-local redirect = require "../../framework/redirect"
-local db = require "../../db"
-local utils = require "../../utils"
+local redirect = require "../../../framework/redirect"
+local db = require "../../../db"
+local utils = require "../../../framework/utils"
 local page = {}
-
-function page:load(request: net.ServeRequest): net.ServeResponse
-	local cookie = request.headers.cookie
-	cookie = cookie and string.match(cookie, "session=([^;]+)")
-
-	if cookie then
-		local session =
-			db:query("SELECT * FROM session WHERE id = ?", { cookie })
-
-		if session[1] then
-			return redirect(302, "/home")
-		end
-	end
-
-	return {}
-end
 
 page.actions = {
 	default = function(request: net.ServeRequest): net.ServeResponse
@@ -36,7 +20,8 @@ page.actions = {
 
 		-- parse request.body for username and password
 		-- it's in the formmat of "username=foo&password=bar"
-		local username = string.match(request.body, "username=([^&]+)")
+		local username =
+			string.lower(string.match(request.body, "username=([^&]+)") or "")
 		local password = string.match(request.body, "password=([^&]+)")
 
 		if not username or not password then
@@ -56,13 +41,13 @@ page.actions = {
 
 		local newCookie = utils.randomString(64)
 
-				db:query("INSERT INTO session (id, username) VALUES (?, ?)", {
+		db:query("INSERT INTO session (id, username) VALUES (?, ?)", {
 			newCookie,
 			username,
 		})
 
 		return redirect(302, "/home", {
-			["set-cookie"] = `session={newCookie}`,
+			["set-cookie"] = `session={newCookie}; Path=/`,
 		})
 	end,
 }

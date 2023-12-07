@@ -16,8 +16,8 @@ local function parseTemplate(str)
 	local function add(type)
 		table.insert(list, {
 			type = type,
-			-- trim whitespace
-			value = string.gsub(currentString, "^%s*(.-)%s*$", "%1"),
+			-- trim whitespace (trimming newlines fux up html sometimes)
+			value = string.gsub(currentString, "^%s*(.-) *$", "%1"),
 		} :: Node)
 		currentString = ""
 	end
@@ -85,7 +85,7 @@ local function renderTemplate(list: Nodes, layout: boolean?)
 
 		if node.type == "string" then
 			value = string.gsub(value, "\n", "\\n")
-			rendered ..= `__rendered ..= \`{value}\`\n`
+			rendered ..= `_rendered ..= \`{value}\`\n`
 		else
 			rendered ..= `{value} `
 		end
@@ -102,8 +102,8 @@ local function renderTemplate(list: Nodes, layout: boolean?)
 local env=getfenv(0)
 for i,v in pairs(__args or {}) do env[i]=v end
 setfenv(0,env)
-local __rendered=""
-]] .. rendered .. "return __rendered end"
+local _rendered=""
+]] .. rendered .. "return _rendered end"
 end
 
 return function(temp, layout)

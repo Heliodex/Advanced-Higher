@@ -11,12 +11,21 @@
 			<h1>Test</h1>
 			<nav>
 				<a href="/">Main</a>
-				<a href="/home">Home</a>
-				<a href="/login">Log in</a>
-				<a href="/register">Register</a>
+				{# if username then #}
+					<a href="/home">Home</a>
+				{# end #}
+				{# if not username then #}
+					<a href="/login">Log in</a>
+					<a href="/register">Register</a>
+				{# end #}
 				<a href="/component">Component</a>
 				<a href="/testing">Testing</a>
 				<a href="/testing/beu">Test404</a>
+				{# if username then #}
+					<form method="POST" action="/logout" id="logout">
+						<button>Log out</button>
+					</form>
+				{# end #}
 			</nav>
 			<br />
 		</header>
@@ -26,6 +35,15 @@
 		h1 \\{
 			margin: 0;
 			color: red;
+		}
+
+		#logout \\{
+			display: inline-block;
+		}
+
+		nav a \\{
+			display: inline-block;
+			padding: 0 5px;
 		}
 	</style>
 </html>
