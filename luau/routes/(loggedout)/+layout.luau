@@ -1,19 +1,11 @@
 local net = require "@lune/net"
-local redirect = require "../../framework/redirect"
-local db = require "../../db"
+local auth = require "../../auth"
 local layout = {}
 
 function layout:load(request: net.ServeRequest): net.ServeResponse
-	local cookie = request.headers.cookie
-	cookie = cookie and string.match(cookie, "session=([^;]+)")
-
-	if cookie then
-		local session =
-			db:query("SELECT * FROM session WHERE id = ?", { cookie })
-
-		if session[1] then
-			return redirect(302, "/home")
-		end
+	local loggedOut = auth:loggedOut(request.headers.cookie)
+	if loggedOut and loggedOut.redirect then
+		return loggedOut.redirect
 	end
 
 	return {}

@@ -10,11 +10,9 @@ page.actions = {
 		local cookie = request.headers.cookie
 		cookie = cookie and string.match(cookie, "session=([^;]+)")
 
-		db:query("DELETE FROM session WHERE id = ?", { cookie })
+		print(db:query("DELETE FROM session WHERE id = ?", { cookie }))
 
-		return redirect(302, "/", {
-			["set-cookie"] = "",
-		})
+		return redirect(302, "/")
 	end,
 }
 

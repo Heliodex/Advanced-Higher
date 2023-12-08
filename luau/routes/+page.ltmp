@@ -1,2 +1,17 @@
-whats up
-{text}
+{#
+	local load = require "../framework/component"
+#}
+
+Welcome home, {username}!
+
+<form method="POST" style="padding-top: 1rem">
+	<textarea type="text" name="content"></textarea>
+	<br />
+	<button type="submit">Post</button>
+</form>
+
+Recent posts
+
+{# for _, post in posts do #}
+	{load "components/Post" (post)}
+{# end #}
