@@ -29,10 +29,8 @@ end
 function utils.parseBody(body: string): { [string]: string }
 	local t = {}
 	for k, v in string.gmatch(body, "([^&=]+)=([^&=]+)") do
-		print("k", k, v)
 		v = string.gsub(v, "+", " ")
-		v = net.urlDecode(v)
-		t[k] = v
+		t[k] = net.urlDecode(v)
 	end
 
 	return t

@@ -1,5 +1,5 @@
 local net = require "@lune/net"
-local redirect = require "../../framework/redirect"
+local Redirect = require "../../framework/redirect"
 local db = require "../../db"
 local page = {}
 
@@ -12,7 +12,7 @@ page.actions = {
 
 		print(db:query("DELETE FROM session WHERE id = ?", { cookie }))
 
-		return redirect(302, "/")
+		return Redirect(302, "/")
 	end,
 }
 

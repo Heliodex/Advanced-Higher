@@ -1,14 +1,12 @@
 local net = require "@lune/net"
 local db = require "../../../db"
+local Error = require "../../../framework/error"
 local page = {}
 
 function page:load(request: net.ServeRequest): net.ServeResponse
 	local username = request.query.user
 	if not username then
-		return {
-			status = 400,
-			body = "No user specified",
-		}
+		return Error(400, "No user specified")
 	end
 
 	local posts = db:query [[

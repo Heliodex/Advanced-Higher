@@ -144,6 +144,8 @@ local function loadRoute(
 			if load._raw == true then
 				load._raw = nil
 				return load
+			elseif load._error == true then
+				return loadRoute(path, "+error", request, load.status, load.err)
 			end
 		elseif method == "POST" and ok and pageServer.actions then
 			local action = request.query[""] or "default"
@@ -201,6 +203,14 @@ local function loadRoute(
 			if layoutLoad._raw == true then
 				layoutLoad._raw = nil
 				return layoutLoad
+			elseif layoutLoad._error == true then
+				return loadRoute(
+					path,
+					"+error",
+					request,
+					layoutLoad.status,
+					layoutLoad.err
+				)
 			end
 
 			-- merge the layout's load with the existing load

@@ -1,5 +1,5 @@
 local net = require "@lune/net"
-local redirect = require "../framework/redirect"
+local Redirect = require "../framework/redirect"
 local utils = require "../framework/utils"
 local auth = require "../auth"
 local db = require "../db"
@@ -32,7 +32,7 @@ page.actions = {
 		local content = utils.parseBody(request.body).content
 
 		if not content then
-			return redirect(302, "/#invalid")
+			return Redirect(302, "/#invalid")
 		end
 
 		print(db:query(
@@ -45,7 +45,7 @@ page.actions = {
 			{ content, loggedIn.cookie }
 		))
 
-		return redirect(302, "/")
+		return Redirect(302, "/")
 	end,
 }
 

@@ -1,5 +1,5 @@
 local db = require "db"
-local redirect = require "framework/redirect"
+local Redirect = require "framework/redirect"
 
 local auth = {}
 
@@ -10,10 +10,14 @@ function auth:loggedOut(cookie: string)
 		local session =
 			db:query("SELECT * FROM session WHERE id = ?", { cookie })
 
+			print(session)
+
 		if session[1] then
-			return { redirect = redirect(302, "/") }
+			print "loggedOut redirecting"
+			return { redirect = Redirect(302, "/") }
 		end
 	end
+	print "loggedOut logged out"
 	return false
 end
 
@@ -24,8 +28,10 @@ function auth:loggedIn(cookie: string)
 		not cookie
 		or not db:query("SELECT * FROM session WHERE id = ?", { cookie })[1]
 	then
-		return { redirect = redirect(302, "/login") }
+		print "loggedIn redirecting"
+		return { redirect = Redirect(302, "/login") }
 	end
+	print "loggedIn logged in"
 	return { cookie = cookie }
 end
 
