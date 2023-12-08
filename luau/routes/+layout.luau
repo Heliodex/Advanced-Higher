@@ -14,10 +14,8 @@ function layout:load(request: net.ServeRequest): { [string]: any }
 		{ cookie }
 	)[1]
 
-	print(user)
-
 	return {
-		username = user and user.username,
+		username = if user then user.username else false,
 	}
 end
 

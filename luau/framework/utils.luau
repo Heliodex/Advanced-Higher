@@ -1,3 +1,4 @@
+local net = require "@lune/net"
 local utils = {}
 
 function utils.randomString(length: number): string
@@ -23,6 +24,18 @@ function utils.merge(t1: { [string]: any }, t2: { [string]: any })
 	end
 
 	return t3
+end
+
+function utils.parseBody(body: string): { [string]: string }
+	local t = {}
+	for k, v in string.gmatch(body, "([^&=]+)=([^&=]+)") do
+		print("k", k, v)
+		v = string.gsub(v, "+", " ")
+		v = net.urlDecode(v)
+		t[k] = v
+	end
+
+	return t
 end
 
 return utils
