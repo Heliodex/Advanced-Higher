@@ -1,8 +1,17 @@
 body {
 	background: #221815;
 	color: #fff;
+	max-width: 40rem;
+	margin: 0 auto;
 }
 
 a {
 	color: cyan;
+}
+
+.post {
+	margin: 0.5rem;
+	padding: 0.5rem;
+	border: 1px solid white;
+	max-width: 40rem;
 }

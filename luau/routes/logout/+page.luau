@@ -1,9 +1,12 @@
 local net = require "@lune/net"
+local Error = require "../../framework/error"
 local Redirect = require "../../framework/redirect"
 local db = require "../../db"
 local page = {}
 
-function page:load() end
+function page:load() 	
+	return Error(404, "Not Found")
+end
 
 page.actions = {
 	default = function(request: net.ServeRequest): net.ServeResponse

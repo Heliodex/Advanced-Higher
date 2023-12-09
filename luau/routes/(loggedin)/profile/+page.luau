@@ -9,14 +9,20 @@ function page:load(request: net.ServeRequest): net.ServeResponse
 		return Error(400, "No user specified")
 	end
 
-	local posts = db:query [[
-		SELECT post.id, post.time, post.content, user.username FROM post
-		JOIN user ON post.username = user.username
-		WHERE user.username = ?
-		ORDER BY post.time DESC
-		LIMIT 10]]
+	local posts = db:query(
+		[[
+			SELECT post.id, post.time, post.content, user.username FROM post
+			JOIN user ON post.username = user.username
+			WHERE user.username = ?
+			ORDER BY post.time DESC
+			LIMIT 10]],
+		{ username }
+	)
+
+	print(posts)
 
 	return {
+		username = username,
 		posts = posts,
 	}
 end

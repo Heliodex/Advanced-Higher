@@ -1,4 +1,4 @@
-<div style="margin: 0.5rem; padding: 0.5rem; border: 1px solid white">
+<div class="post">
 	<a href="/profile?user={username}"><b>{username}</b></a>
 	<br />
 	{content}

@@ -1,0 +1,11 @@
+{#
+	local load = require "../../../framework/component"
+#}
+
+Profile page for {username}
+
+<div style="padding-top:1rem">
+	{# for _, post in posts do #}
+		{load "components/Post" (post)}
+	{# end #}
+</div>
