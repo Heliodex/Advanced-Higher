@@ -1,4 +1,5 @@
 local fs = require "@lune/fs"
+local luau = require "@lune/luau"
 local net = require "@lune/net"
 local stdio = require "@lune/stdio"
 
@@ -89,24 +90,20 @@ function framework:routes(filepath: string?)
 	return self
 end
 
-local function createFile(path, contents)
-	-- create each directory in the path if it doesn't exist
-	local currentPath = ""
-	for dir in string.gmatch(path, "[^/]+") do
-		-- don't create the last part of the path
-		if dir == string.match(path, "^.*/([^/]*)$") then
-			break
-		end
-		currentPath ..= `{dir}/`
-		if not fs.isDir(currentPath) then
-			fs.writeDir(currentPath)
-		end
-	end
-
-	fs.writeFile(`{path}.luau`, contents)
-end
-
 export type Data = { [string]: any }
+export type Request = net.ServeRequest
+export type Response = net.ServeResponse
+export type Page = {
+	load: ((request: net.ServeRequest, status: number, err: string?) -> Data)?,
+	actions: {
+		[string]: (request: net.ServeRequest) -> net.ServeResponse | string,
+	}?,
+}
+export type Layout = {
+	load: ((request: net.ServeRequest, status: number, err: string?) -> Data)?,
+}
+
+type PageFunction = () -> string
 
 local function loadRoute(
 	path: string,
@@ -115,14 +112,13 @@ local function loadRoute(
 	status: number,
 	err: string?
 ): net.ServeResponse | string
-	local filename = `{path}/+page`
+	local filename = `{path}/+page.luau`
 	local load: Data
 	local method = request.method
 
 	if filetype == "+page" then
 		local ok, pageServer: {
 			load: ((
-				self: any,
 				request: net.ServeRequest,
 				status: number,
 				err: string?
@@ -132,13 +128,15 @@ local function loadRoute(
 					request: net.ServeRequest
 				) -> net.ServeResponse | string,
 			}?,
-		} =
-			pcall(require, filename)
+		} = pcall(
+			function()
+				return luau.load(fs.readFile(filename))()
+			end
+		)
 
 		if method == "GET" then
 			load = if ok and pageServer.load
-				-- method call (:) fux up
-				then pageServer.load(pageServer, request, status, err)
+				then pageServer.load(request, status, err)
 				else {}
 
 			if load._raw == true then
@@ -174,31 +172,30 @@ local function loadRoute(
 	end
 
 	-- compile and add +page.ltmp file
-	local pageFilename = `{path}/{filetype}.ltmp`
-	local ok, isPageFile = pcall(fs.isFile, pageFilename)
+	local ok, pageFile = pcall(fs.readFile, `{path}/{filetype}.ltmp`)
 
 	if not ok then
-		error(isPageFile)
+		pageFile = `{status} {err}`
 	end
 
-	local compiledPath = `.compiled{path}/{filetype}`
 	local layoutPath = path
 
 	-- bubble up the directory tree, adding +layout.luau files
 	while true do
 		local ok2, layoutServer: {
 			load: ((
-				self: any,
 				request: net.ServeRequest,
 				status: number,
 				err: string?
 			) -> Data)?,
-		} =
-			pcall(require, `{layoutPath}/+layout`)
+		} = pcall(
+			function()
+				return luau.load(fs.readFile(`{layoutPath}/+layout.luau`))()
+			end
+		)
 
 		if ok2 and layoutServer.load then
-			local layoutLoad =
-				layoutServer.load(layoutServer, request, status, err)
+			local layoutLoad = layoutServer.load(request, status, err)
 
 			if layoutLoad._raw == true then
 				layoutLoad._raw = nil
@@ -226,23 +223,16 @@ local function loadRoute(
 
 	-- compile the layout template
 	local templated
-	local readok, pageFile = pcall(fs.readFile, pageFilename)
+	local compiled = template(pageFile)
 
-	if not readok then
+	if not compiled then
 		-- bubble up the directory tree, looking for an error template
 		while true do
 			print("compiling error template", path)
-			local compiledErrorPath = compile(path, "+error")
+			local layout = compile(path, "+error")
 
-			if compiledErrorPath then
-				local ok2, layout: (args: Data, SLOT: string) -> string =
-					pcall(require, compiledErrorPath)
-
-				if not ok2 then
-					error(layout) -- yes, this is needed
-				end
-
-				templated = layout(load, "body")
+			if layout then
+				templated = layout(load)
 				break
 			end
 
@@ -257,14 +247,9 @@ local function loadRoute(
 	end
 
 	if not templated then
-		local pageok, page: (args: Data) -> string
-		local templateok, compiled = pcall(template, pageFile)
-
-		if templateok then
-			createFile(compiledPath, compiled)
-
-			pageok, page = pcall(require, compiledPath)
-		end
+		local pageok, page: PageFunction = pcall(luau.load, compiled, {
+			environment = load,
+		})
 
 		if not pageok then
 			if filetype == "+error" then
@@ -276,23 +261,18 @@ local function loadRoute(
 				templated = `{status} {err}`
 			end
 		else
-			templated = page(load)
+			templated = page()
 		end
 	end
 
 	-- bubble up the directory tree, adding layout files
 	while true do
-		local compiledLayoutPath = compile(path, "+layout")
+		local layout = compile(path, "+layout")
 
-		if compiledLayoutPath then
-			local layoutok, layout: (args: Data, SLOT: string) -> string =
-				pcall(require, compiledLayoutPath)
-
-			if not layoutok then
-				error(layout)
-			end
-
-			templated = layout({}, templated)
+		if layout then
+			templated = layout(utils.merge(load, {
+				SLOT = templated,
+			}))
 		end
 
 		local newPath = string.match(path, "^(.*)/[^/]*$")
@@ -389,8 +369,7 @@ function framework:listen(port: number)
 
 		if self._routes then
 			local basePath = self._routes .. path
-			local gotPath = getRoutePath(basePath)
-			gotPath = gotPath or basePath
+			local gotPath = getRoutePath(basePath) or basePath
 
 			local routePageFilename = `{gotPath}/+page.ltmp`
 			local routeServerFilename = `{gotPath}/+page.luau`
@@ -403,7 +382,7 @@ function framework:listen(port: number)
 					pcall(loadRoute, gotPath, "+page", request, 200)
 
 				if not routeok then
-					warn(res)
+					error(res)
 					return loadRoute(
 						gotPath,
 						"+error",
@@ -422,7 +401,6 @@ function framework:listen(port: number)
 						body = res,
 					}
 				end
-
 				return res
 			end
 
@@ -438,7 +416,12 @@ function framework:listen(port: number)
 	end)
 end
 
-local createFramework = {}
+local createFramework = {
+	component = require "component",
+	redirect = require "redirect",
+	error = require "error",
+	utils = utils,
+}
 
 --[=[
 	Creates a new framework instance.

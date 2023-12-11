@@ -14,11 +14,14 @@ local function parseTemplate(str)
 	local i = 0
 
 	local function add(type)
-		table.insert(list, {
-			type = type,
-			-- trim whitespace (trimming newlines fux up html sometimes)
-			value = string.gsub(currentString, "^%s*(.-) *$", "%1"),
-		} :: Node)
+		table.insert(
+			list,
+			{
+				type = type,
+				-- trim whitespace (trimming newlines fux up html sometimes)
+				value = string.gsub(currentString, "^%s*(.-) *$", "%1"),
+			} :: Node
+		)
 		currentString = ""
 	end
 
@@ -83,27 +86,15 @@ local function renderTemplate(list: Nodes, layout: boolean?)
 		value = string.gsub(value, "\\\\{", "\\{")
 		value = string.gsub(value, "`", "\\`")
 
-		if node.type == "string" then
-			value = string.gsub(value, "\n", "\\n")
-			rendered ..= `_rendered ..= \`{value}\`\n`
-		else
-			rendered ..= `{value} `
-		end
+		rendered ..= if node.type == "string"
+			then `_rendered ..= \`{string.gsub(value, "\n", "\\n")}\`\n`
+			else `{value} `
 	end
-
-	local initial = if layout
-		then "return function(__args,SLOT)"
-		else "return function(__args)"
-
 	-- god please have mercy on my soul
 	return [[-- Generated framework template
 -- modify at your own peril
-]] .. initial .. [[
-local env=getfenv(0)
-for i,v in pairs(__args or {}) do env[i]=v end
-setfenv(0,env)
 local _rendered=""
-]] .. rendered .. "return _rendered end"
+]] .. rendered .. "return _rendered"
 end
 
 return function(temp, layout)
