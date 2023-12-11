@@ -1,12 +1,13 @@
-local net = require "@lune/net"
-local db = require "../db"
-local layout = {}
+local db = require "db"
 
-function layout:load(request: net.ServeRequest): { [string]: any }
+local fw = require "framework"
+local layout: fw.Layout = {}
+
+function layout.load(request): fw.Data
 	local cookie = request.headers.cookie
 	cookie = cookie and string.match(cookie, "session=([^;]+)")
 
-	local user = db:query(
+	local user = db.query(
 		[[
 			SELECT user.username FROM user
 			JOIN session ON user.username = session.username

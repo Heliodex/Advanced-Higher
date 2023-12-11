@@ -1,10 +1,12 @@
 local net = require "@lune/net"
-local Error = require "../../framework/error"
-local Redirect = require "../../framework/redirect"
-local db = require "../../db"
-local page = {}
+local db = require "db"
 
-function page:load() 	
+local fw = require "framework"
+local Error = fw.error
+local Redirect = fw.redirect
+local page: fw.Page = {}
+
+function page.load()
 	return Error(404, "Not Found")
 end
 
@@ -13,7 +15,7 @@ page.actions = {
 		local cookie = request.headers.cookie
 		cookie = cookie and string.match(cookie, "session=([^;]+)")
 
-		print(db:query("DELETE FROM session WHERE id = ?", { cookie }))
+		print(db.query("DELETE FROM session WHERE id = ?", { cookie }))
 
 		return Redirect(302, "/")
 	end,

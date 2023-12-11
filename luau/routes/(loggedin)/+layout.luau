@@ -1,8 +1,9 @@
-local net = require "@lune/net"
-local auth = require "../../auth"
-local layout = {}
+local auth = require "auth"
 
-function layout:load(request: net.ServeRequest): net.ServeResponse
+local fw = require "framework"
+local layout: fw.Layout = {}
+
+function layout.load(request): fw.Data
 	local loggedIn = auth:loggedIn(request.headers.cookie)
 	if loggedIn.redirect then
 		return loggedIn.redirect

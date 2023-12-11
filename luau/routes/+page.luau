@@ -1,17 +1,18 @@
-local net = require "@lune/net"
-local Redirect = require "../framework/redirect"
-local utils = require "../framework/utils"
-local auth = require "../auth"
-local db = require "../db"
-local page = {}
+local auth = require "auth"
+local db = require "db"
 
-function page:load(request: net.ServeRequest): net.ServeResponse
+local fw = require "framework"
+local Redirect = fw.redirect
+local utils = fw.utils
+local page: fw.Page = {}
+
+function page.load(request): fw.Data
 	local loggedIn = auth:loggedIn(request.headers.cookie)
 	if loggedIn.redirect then
 		return loggedIn.redirect
 	end
 
-	local posts = db:query [[
+	local posts = db.query [[
 		SELECT post.id, post.time, post.content, user.username FROM post
 		JOIN user ON post.username = user.username
 		ORDER BY post.time DESC
@@ -23,7 +24,7 @@ function page:load(request: net.ServeRequest): net.ServeResponse
 end
 
 page.actions = {
-	default = function(request: net.ServeRequest)
+	default = function(request): fw.Response
 		local loggedIn = auth:loggedIn(request.headers.cookie)
 		if loggedIn.redirect then
 			return loggedIn.redirect
@@ -35,7 +36,7 @@ page.actions = {
 			return Redirect(302, "/#invalid")
 		end
 
-		print(db:query(
+		print(db.query(
 			[[
 				INSERT INTO post (content, username)
 				SELECT ?, user.username

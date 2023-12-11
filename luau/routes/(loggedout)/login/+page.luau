@@ -1,12 +1,13 @@
-local net = require "@lune/net"
-local Redirect = require "../../../framework/redirect"
-local auth = require "../../../auth"
-local db = require "../../../db"
-local utils = require "../../../framework/utils"
-local page = {}
+local auth = require "auth"
+local db = require "db"
+
+local fw = require "framework"
+local Redirect = fw.redirect
+local utils = fw.utils
+local page: fw.Page = {}
 
 page.actions = {
-	default = function(request: net.ServeRequest): net.ServeResponse
+	default = function(request): fw.Response
 		local loggedOut = auth:loggedOut(request.headers.cookie)
 		if loggedOut and loggedOut.redirect then
 			return loggedOut.redirect
@@ -20,7 +21,7 @@ page.actions = {
 			return Redirect(302, "/login#incorrect")
 		end
 
-		local user = db:query(
+		local user = db.query(
 			"SELECT * FROM user WHERE username = ? AND password = ?",
 			{ username, password }
 		)[1]
@@ -31,7 +32,7 @@ page.actions = {
 
 		local newCookie = utils.randomString(64)
 
-		db:query("INSERT INTO session (id, username) VALUES (?, ?)", {
+		db.query("INSERT INTO session (id, username) VALUES (?, ?)", {
 			newCookie,
 			username,
 		})

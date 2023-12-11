@@ -8,7 +8,7 @@ function auth:loggedOut(cookie: string)
 
 	if cookie then
 		local session =
-			db:query("SELECT * FROM session WHERE id = ?", { cookie })
+			db.query("SELECT * FROM session WHERE id = ?", { cookie })
 
 		if session[1] then
 			return { redirect = Redirect(302, "/") }
@@ -22,7 +22,7 @@ function auth:loggedIn(cookie: string)
 
 	if
 		not cookie
-		or not db:query("SELECT * FROM session WHERE id = ?", { cookie })[1]
+		or not db.query("SELECT * FROM session WHERE id = ?", { cookie })[1]
 	then
 		return { redirect = Redirect(302, "/login") }
 	end

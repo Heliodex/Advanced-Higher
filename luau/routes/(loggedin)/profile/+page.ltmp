@@ -1,5 +1,6 @@
 {#
-	local load = require "../../../framework/component"
+	local fw = require "framework"
+	local load = fw.component
 #}
 
 Profile page for {username}

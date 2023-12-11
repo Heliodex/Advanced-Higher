@@ -1,15 +1,16 @@
-local net = require "@lune/net"
-local db = require "../../../db"
-local Error = require "../../../framework/error"
-local page = {}
+local db = require "db"
 
-function page:load(request: net.ServeRequest): net.ServeResponse
+local fw = require "framework"
+local Error = fw.error
+local page: fw.Page = {}
+
+function page.load(request): fw.Data
 	local username = request.query.user
 	if not username then
 		return Error(400, "No user specified")
 	end
 
-	local posts = db:query(
+	local posts = db.query(
 		[[
 			SELECT post.id, post.time, post.content, user.username FROM post
 			JOIN user ON post.username = user.username
