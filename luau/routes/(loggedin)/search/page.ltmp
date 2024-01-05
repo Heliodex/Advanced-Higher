@@ -1,0 +1,18 @@
+{#
+	local fw = require "framework"
+	local load = fw.component
+#}
+
+<form>
+	<input type="text" name="q" value="{search}"  />
+	<input type="submit" value="Search" />
+</form>
+
+<div style="padding-top:1rem">
+	{# if search ~= "" then #}
+		{# for _, post in posts do #}
+			{load "components/Post"(post)}
+		{# end #}
+	{# end #}
+</div>
+
