@@ -5,8 +5,8 @@
 
 Welcome home, {username}!
 
-<form method="POST" style="padding-top: 1rem">
-	<textarea type="text" name="content"></textarea>
+<form method="POST" style="padding: 1rem 0">
+	<textarea type="text" name="content" rows="3" cols="40" required></textarea>
 	<br />
 	<button type="submit">Post</button>
 </form>
@@ -14,5 +14,5 @@ Welcome home, {username}!
 Recent posts
 
 {# for _, post in posts do #}
-	{load "components/Post" (post)}
+	{load "components/Post"(post)}
 {# end #}

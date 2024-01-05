@@ -1,4 +1,4 @@
-local db = require "db"
+local query = require "db"
 
 local fw = require "framework"
 local Error = fw.error
@@ -10,17 +10,15 @@ function page.load(request): fw.Data
 		return Error(400, "No user specified")
 	end
 
-	local posts = db.query(
+	local posts = query(
 		[[
 			SELECT post.id, post.time, post.content, user.username FROM post
 			JOIN user ON post.username = user.username
 			WHERE user.username = ?
 			ORDER BY post.time DESC
 			LIMIT 10]],
-		{ username }
+		username
 	)
-
-	print(posts)
 
 	return {
 		username = username,

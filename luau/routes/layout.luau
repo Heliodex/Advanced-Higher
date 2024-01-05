@@ -1,4 +1,4 @@
-local db = require "db"
+local query = require "db"
 
 local fw = require "framework"
 local layout: fw.Layout = {}
@@ -7,12 +7,12 @@ function layout.load(request): fw.Data
 	local cookie = request.headers.cookie
 	cookie = cookie and string.match(cookie, "session=([^;]+)")
 
-	local user = db.query(
+	local user = query(
 		[[
 			SELECT user.username FROM user
 			JOIN session ON user.username = session.username
 			WHERE session.id = ?]],
-		{ cookie }
+		cookie
 	)[1]
 
 	return {

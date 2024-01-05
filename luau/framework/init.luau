@@ -112,11 +112,11 @@ local function loadRoute(
 	status: number,
 	err: string?
 ): net.ServeResponse | string
-	local filename = `{path}/+page.luau`
+	local filename = `{path}/page.luau`
 	local load: Data
 	local method = request.method
 
-	if filetype == "+page" then
+	if filetype == "page" then
 		local ok, pageServer: {
 			load: ((
 				request: net.ServeRequest,
@@ -149,8 +149,6 @@ local function loadRoute(
 			local action = request.query[""] or "default"
 			local actionFunc = pageServer.actions[action]
 
-			print("calling action", action)
-
 			if actionFunc then
 				return actionFunc(request)
 			end
@@ -171,7 +169,7 @@ local function loadRoute(
 		}
 	end
 
-	-- compile and add +page.ltmp file
+	-- compile and add page.ltmp file
 	local ok, pageFile = pcall(fs.readFile, `{path}/{filetype}.ltmp`)
 
 	if not ok then
@@ -180,7 +178,7 @@ local function loadRoute(
 
 	local layoutPath = path
 
-	-- bubble up the directory tree, adding +layout.luau files
+	-- bubble up the directory tree, adding layout.luau files
 	while true do
 		local ok2, layoutServer: {
 			load: ((
@@ -190,7 +188,7 @@ local function loadRoute(
 			) -> Data)?,
 		} = pcall(
 			function()
-				return luau.load(fs.readFile(`{layoutPath}/+layout.luau`))()
+				return luau.load(fs.readFile(`{layoutPath}/layout.luau`))()
 			end
 		)
 
@@ -267,7 +265,7 @@ local function loadRoute(
 
 	-- bubble up the directory tree, adding layout files
 	while true do
-		local layout = compile(path, "+layout")
+		local layout = compile(path, "layout")
 
 		if layout then
 			templated = layout(utils.merge(load, {
@@ -290,7 +288,7 @@ local function loadRoute(
 end
 
 local function getRoutePath(path: string)
-	-- check if "routes/testing/beu/+page.ltmp" exists,
+	-- check if "routes/testing/beu/page.ltmp" exists,
 	-- but also check if "routes/(layout)/testing/beu" exists
 	-- (layouts are enclosed in parentheses)
 
@@ -363,6 +361,9 @@ function framework:listen(port: number)
 				return {
 					status = 200,
 					body = readFile,
+					headers = {
+						["Cache-Control"] = "max-age=31536000",
+					},
 				}
 			end
 		end
@@ -371,18 +372,18 @@ function framework:listen(port: number)
 			local basePath = self._routes .. path
 			local gotPath = getRoutePath(basePath) or basePath
 
-			local routePageFilename = `{gotPath}/+page.ltmp`
-			local routeServerFilename = `{gotPath}/+page.luau`
+			local routePageFilename = `{gotPath}/page.ltmp`
+			local routeServerFilename = `{gotPath}/page.luau`
 
 			local pageOk, isRoutePage = pcall(fs.isFile, routePageFilename)
 			local serverOk, isRouteServer =
 				pcall(fs.isFile, routeServerFilename)
 			if (pageOk and isRoutePage) or (serverOk and isRouteServer) then
 				local routeok, res =
-					pcall(loadRoute, gotPath, "+page", request, 200)
+					pcall(loadRoute, gotPath, "page", request, 200)
 
 				if not routeok then
-					error(res)
+					stdio.ewrite(`{res}\n`)
 					return loadRoute(
 						gotPath,
 						"+error",
@@ -420,7 +421,7 @@ local createFramework = {
 	component = require "component",
 	redirect = require "redirect",
 	error = require "error",
-	utils = utils,
+	utils = require "utils",
 }
 
 --[=[

@@ -1,22 +1,22 @@
 <form method="POST">
 	<fieldset>
-		<legend>Register</legend>
+		<legend>Log in</legend>
 		<label for="username">Username</label>
 		<input type="text" name="username" />
 		<label for="password">Password</label>
 		<input type="password" name="password"/>
-		<button>Register</button>
-		<p id="invalid">
-			The username or password is invalid.
-		</p>
-		<p id="taken">
-			This username is already taken.
-		</p>
+		<button>Log in</button>
+		<small id="incorrect" class="error">
+			Incorrect username or password.
+		</small>
+		<small id="missing" class="error">
+			Missing username or password.
+		</small>
 	</fieldset>
 </form>
 
 <style>
-	#invalid, #taken \\{
+	.error \\{
 		display: none;
 		color: red;
 		&:target \\{

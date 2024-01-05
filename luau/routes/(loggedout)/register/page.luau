@@ -1,5 +1,5 @@
 local auth = require "auth"
-local db = require "db"
+local query = require "db"
 
 local fw = require "framework"
 local Redirect = fw.redirect
@@ -8,7 +8,7 @@ local page: fw.Page = {}
 
 page.actions = {
 	default = function(request): fw.Response
-		local loggedOut = auth:loggedOut(request.headers.cookie)
+		local loggedOut = auth.loggedOut(request.headers.cookie)
 		if loggedOut and loggedOut.redirect then
 			return loggedOut.redirect
 		end
@@ -18,24 +18,28 @@ page.actions = {
 		local password = body.password
 
 		if not username or not password then
-			return Redirect(302, "/login#incorrect")
+			return Redirect(302, "/register#invalid")
 		end
 
-		local user = db.query(
-			"SELECT * FROM user WHERE username = ? AND password = ?",
-			{ username, password }
-		)[1]
+		local user = query("SELECT * FROM user WHERE username = ?", username)
 
-		if not user then
-			return Redirect(302, "/login#incorrect")
+		if user[1] then
+			return Redirect(302, "/register#taken")
 		end
 
 		local newCookie = utils.randomString(64)
 
-		db.query("INSERT INTO session (id, username) VALUES (?, ?)", {
-			newCookie,
+		-- cant be bothered to hash passwords
+		query(
+			"INSERT INTO user (username, password) VALUES (?, ?)",
 			username,
-		})
+			password
+		)
+		query(
+			"INSERT INTO session (id, username) VALUES (?, ?)",
+			newCookie,
+			username
+		)
 
 		return Redirect(302, "/", {
 			["set-cookie"] = `session={newCookie}; Path=/`,

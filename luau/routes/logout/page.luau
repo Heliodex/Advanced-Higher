@@ -1,5 +1,4 @@
-local net = require "@lune/net"
-local db = require "db"
+local query = require "db"
 
 local fw = require "framework"
 local Error = fw.error
@@ -11,11 +10,11 @@ function page.load()
 end
 
 page.actions = {
-	default = function(request: net.ServeRequest): net.ServeResponse
+	default = function(request): fw.Response
 		local cookie = request.headers.cookie
 		cookie = cookie and string.match(cookie, "session=([^;]+)")
 
-		print(db.query("DELETE FROM session WHERE id = ?", { cookie }))
+		query("DELETE FROM session WHERE id = ?", cookie)
 
 		return Redirect(302, "/")
 	end,

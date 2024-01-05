@@ -1,5 +1,14 @@
+{#
+	local fw = require "framework"
+	local utils = fw.utils
+#}
+
 <div class="post">
 	<a href="/profile?user={username}"><b>{username}</b></a>
 	<br />
 	{content}
+	<small>
+		<br />
+		{utils.timeSince(string.sub(time, 1, 19))}
+	</small>
 </div>
