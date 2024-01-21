@@ -14,14 +14,11 @@ local function parseTemplate(str)
 	local i = 0
 
 	local function add(type)
-		table.insert(
-			list,
-			{
-				type = type,
-				-- trim whitespace (trimming newlines fux up html sometimes)
-				value = string.gsub(currentString, "^%s*(.-) *$", "%1"),
-			} :: Node
-		)
+		table.insert(list, {
+			type = type,
+			-- trim whitespace (trimming newlines fux up html sometimes)
+			value = string.gsub(currentString, "^%s*(.-) *$", "%1"),
+		} :: Node)
 		currentString = ""
 	end
 
@@ -77,7 +74,7 @@ local function parseTemplate(str)
 	return list
 end
 
-local function renderTemplate(list: Nodes, layout: boolean?)
+local function renderTemplate(list: Nodes)
 	local rendered = ""
 
 	for _, node in list do
@@ -91,13 +88,10 @@ local function renderTemplate(list: Nodes, layout: boolean?)
 			else `{value} `
 	end
 	-- god please have mercy on my soul
-	return [[-- Generated framework template
--- modify at your own peril
-local _rendered=""
-]] .. rendered .. "return _rendered"
+	return `local _rendered = ""\n{rendered}\nreturn _rendered`
 end
 
-return function(temp, layout)
+return function(temp)
 	temp = string.gsub(temp, "\r\n", "\n")
 
 	local chars = {}
@@ -106,5 +100,5 @@ return function(temp, layout)
 		table.insert(chars, i)
 	end
 
-	return renderTemplate(parseTemplate(chars), layout)
+	return renderTemplate(parseTemplate(chars))
 end

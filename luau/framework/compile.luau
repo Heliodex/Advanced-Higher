@@ -12,7 +12,7 @@ return function(path: string, filetype: string): ((args: Data) -> string)?
 		return
 	end
 
-	local compiled = template(fs.readFile(filename), true)
+	local compiled = template(fs.readFile(filename))
 
 	return function(args)
 		return luau.load(compiled, {
