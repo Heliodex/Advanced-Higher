@@ -26,6 +26,14 @@ function utils.merge(t1: { [string]: any }, t2: { [string]: any })
 	return t3
 end
 
+function utils.reverse(t: { [number]: any })
+	local t2 = {}
+	for i = #t, 1, -1 do
+		table.insert(t2, t[i])
+	end
+	return t2
+end
+
 function utils.parseBody(body: string): { [string]: string }
 	local t = {}
 	for k, v in string.gmatch(body, "([^&=]+)=([^&=]+)") do

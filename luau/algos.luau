@@ -16,6 +16,22 @@ function algos.bubbleSort(list: { number })
 	return list
 end
 
+function algos.bubbleSortBy(list: { any }, key: string)
+	local swapped = true
+	local n = #list
+	while swapped do
+		swapped = false
+		for i = 1, n - 1 do
+			if list[i][key] > list[i + 1][key] then
+				list[i], list[i + 1] = list[i + 1], list[i]
+				swapped = true
+			end
+		end
+		n -= 1
+	end
+	return list
+end
+
 function algos.insertionSort(list: { number })
 	local value = 0
 	local index = 0
