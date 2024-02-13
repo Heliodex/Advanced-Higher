@@ -4,13 +4,14 @@ local fw = require "framework"
 local Redirect = fw.redirect
 local auth = {}
 
-function auth.loggedOut(cookie: string)
-	cookie = cookie and string.match(cookie, "session=([^;]+)")
+function auth.loggedOut(cookie: string): fw.Response | false
+	local parsedCookie = cookie and string.match(cookie, "session=([^;]+)")
 
-	if cookie then
-		local session = query("SELECT * FROM session WHERE id = ?", cookie)
+	if parsedCookie then
+		local sessions =
+			query("SELECT * FROM session WHERE id = ?", parsedCookie)
 
-		if session[1] then
+		if sessions and sessions[1] then
 			return { redirect = Redirect(302, "/") }
 		end
 	end
@@ -21,15 +22,13 @@ function auth.loggedIn(cookie: string): {
 	redirect: fw.Response?,
 	cookie: string?,
 }
-	cookie = cookie and string.match(cookie, "session=([^;]+)")
+	local parsedCookie = cookie and string.match(cookie, "session=([^;]+)")
+	local sessions = query("SELECT * FROM session WHERE id = ?", parsedCookie)
 
-	if
-		not cookie
-		or not query("SELECT * FROM session WHERE id = ?", cookie)[1]
-	then
+	if not (parsedCookie and sessions and sessions[1]) then
 		return { redirect = Redirect(302, "/login") }
 	end
-	return { cookie = cookie }
+	return { cookie = parsedCookie }
 end
 
 return auth

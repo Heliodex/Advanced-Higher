@@ -3,7 +3,7 @@ local net = require "@lune/net"
 -- URL of a proxy to the database server (see db.ts)
 local url = "http://localhost:3307"
 
-function query(content: string, ...: string | number)
+function query(content: string, ...: string | number): { any }?
 	local body
 
 	for _ = 1, 2 do
@@ -26,7 +26,7 @@ function query(content: string, ...: string | number)
 		body = net.jsonDecode(res.body)
 	end
 
-	return if body.rows then body.rows else body
+	return if body.rows then body.rows else nil
 end
 
 print "running starter queries"

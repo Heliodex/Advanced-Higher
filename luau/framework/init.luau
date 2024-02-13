@@ -18,6 +18,22 @@ local reset = colour "reset"
 local yellow = colour "yellow"
 local cyan = colour "cyan"
 
+type Framework = {
+	-- The configuration for the framework.
+	config: Config?,
+	-- The public directory, where static files are served from.
+	_public: string?,
+	-- The routes directory, where routes are loaded from.
+	_routes: string?,
+
+	_log: (self: Framework, colourName: stdio.Color, message: string) -> (),
+	public: (self: Framework, filepath: string?) -> Framework,
+	routes: (self: Framework, filepath: string?) -> Framework,
+	listen: (self: Framework, port: number) -> (),
+
+	__index: Framework,
+}
+
 --[=[
 	Framework description
 ]=]
@@ -28,7 +44,7 @@ type Config = {
 	verbose: boolean?,
 }
 
-function framework:_log(colourName: stdio.Color?, message: string)
+function framework:_log(colourName: stdio.Color, message: string)
 	if not (self.config and self.config.verbose) then
 		return
 	end
@@ -213,10 +229,11 @@ local function loadRoute(
 			load = utils.merge(layoutLoad, load)
 		end
 
-		layoutPath = string.match(layoutPath, "^(.*)/[^/]*$")
-		if not layoutPath then
+		local newLayoutPath = string.match(layoutPath, "^(.*)/[^/]*$")
+		if not newLayoutPath then
 			break
 		end
+		layoutPath = newLayoutPath
 	end
 
 	-- compile the layout template
@@ -287,7 +304,7 @@ local function loadRoute(
 	}
 end
 
-local function getRoutePath(path: string)
+local function getRoutePath(path: string): string?
 	-- check if "routes/testing/beu/page.ltmp" exists,
 	-- but also check if "routes/(layout)/testing/beu" exists
 	-- (layouts are enclosed in parentheses)
@@ -428,7 +445,7 @@ local createFramework = {
 	Creates a new framework instance.
 ]=]
 function createFramework:new(config: Config?)
-	local this = setmetatable({}, framework)
+	local this = framework
 	this.config = config
 	this:_log("blue", "Verbose mode enabled")
 	return this

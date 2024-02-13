@@ -21,13 +21,13 @@ page.actions = {
 			return Redirect(302, "/login#missing")
 		end
 
-		local user = query(
+		local users = query(
 			"SELECT * FROM user WHERE username = ? AND password = ?",
 			username,
 			password
-		)[1]
+		)
 
-		if not user then
+		if not (users and users[1]) then
 			return Redirect(302, "/login#incorrect")
 		end
 

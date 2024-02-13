@@ -3,17 +3,28 @@ local query = require "db"
 local fw = require "framework"
 local layout: fw.Layout = {}
 
-function layout.load(request): fw.Data
-	local cookie = request.headers.cookie
-	cookie = cookie and string.match(cookie, "session=([^;]+)")
+type User = {
+	username: string,
+}
 
-	local user = query(
+function layout.load(request): fw.Data
+	local cookie = string.match(request.headers.cookie, "session=([^;]+)")
+
+	if not cookie then
+		return {
+			username = false,
+		}
+	end
+
+	local users: { User } = query(
 		[[
 			SELECT user.username FROM user
 			JOIN session ON user.username = session.username
 			WHERE session.id = ?]],
 		cookie
-	)[1]
+	)
+
+	local user = users[1]
 
 	return {
 		username = if user then user.username else false,
