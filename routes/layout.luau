@@ -16,7 +16,7 @@ function layout.load(request): fw.Data
 		}
 	end
 
-	local users: { User } = query(
+	local users: { User }? = query(
 		[[
 			SELECT user.username FROM user
 			JOIN session ON user.username = session.username
@@ -24,7 +24,7 @@ function layout.load(request): fw.Data
 		cookie
 	)
 
-	local user = users[1]
+	local user = users and users[1]
 
 	return {
 		username = if user then user.username else false,

@@ -26,7 +26,7 @@ function page.load(request): fw.Data
 			WHERE user.username = ?
 			LIMIT 10]],
 		username
-	)
+	) or {}
 
 	posts = algos.bubbleSortBy(posts, "id")
 	posts = utils.reverse(posts)

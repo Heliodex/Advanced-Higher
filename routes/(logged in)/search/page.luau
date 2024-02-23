@@ -25,23 +25,21 @@ function page.load(request): fw.Data
 
 	local posts: { Post } = query [[
 		SELECT post.id, post.time, post.content, user.username FROM post
-		JOIN user ON post.username = user.username]]
+		JOIN user ON post.username = user.username]] or {}
 
 	posts = algos.insertionSortBy(posts, "content")
 	local position = algos.binarySearchBy(posts, "content", search)
 
 	print(search, position, posts[4].content == search)
 
-	if position < 0 then
-		return {
+	return if position < 0
+		then {
 			search = search,
 		}
-	end
-
-	return {
-		search = search,
-		posts = { posts[position] },
-	}
+		else {
+			search = search,
+			posts = { posts[position] },
+		}
 end
 
 return page
