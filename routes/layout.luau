@@ -8,7 +8,7 @@ type User = {
 }
 
 function layout.load(request): fw.Data
-	local cookie = string.match(request.headers.cookie, "session=([^;]+)")
+	local cookie = string.match(request.headers.cookie or "", "session=([^;]+)")
 
 	if not cookie then
 		return {
