@@ -20,10 +20,14 @@ function page.load(request): fw.Data
 		return loggedIn.redirect
 	end
 
-	local posts: { Post } = query [[
+	local posts: { Post }? = query [[
 		SELECT post.id, post.time, post.content, user.username FROM post
 		JOIN user ON post.username = user.username
 		LIMIT 10]]
+
+	if not posts then
+		return {}
+	end
 
 	posts = algos.bubbleSortBy(posts, "id")
 	posts = utils.reverse(posts)
@@ -50,7 +54,7 @@ page.actions = {
 				JOIN session ON user.username = session.username
 				WHERE session.id = ?]],
 			content,
-			loggedIn.cookie
+			loggedIn.cookie :: string
 		)
 
 		return Redirect(302, "/")

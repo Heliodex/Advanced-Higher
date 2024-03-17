@@ -1,12 +1,13 @@
 {#
 	local fw = require "framework"
 	local load = fw.component
+	local Post = load "Post"
 #}
 
-Profile page for {username}
+Profile page for {profileUsername}
 
 <div style="padding-top:1rem">
 	{# for _, post in posts do #}
-		{load "components/Post"(post)}
+		{Post(post)}
 	{# end #}
 </div>

@@ -7,16 +7,10 @@ type Data = { [string]: any }
 ]]
 return function(path: string)
 	-- split at the final slash into (path, filename)
-	local basepath, filename = string.match(path, "^(.*)/([^/]*)$")
-
-	if not (basepath and filename) then
-		error(`{path} is not a valid component path`)
-	end
-
-	local component = compile(basepath, filename)
+	local component = compile("components", path)
 
 	if not component then
-		error(`{path} is not a valid component`)
+		error(`{path} is not a valid component`, -1)
 	end
 
 	return component

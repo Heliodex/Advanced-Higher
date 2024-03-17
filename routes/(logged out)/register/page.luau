@@ -21,7 +21,7 @@ page.actions = {
 			return Redirect(302, "/register#invalid")
 		end
 
-		local users = query("SELECT * FROM user WHERE username = ?", username)
+		local users = query("SELECT 1 FROM user WHERE username = ?", username)
 
 		if users and users[1] then
 			return Redirect(302, "/register#taken")

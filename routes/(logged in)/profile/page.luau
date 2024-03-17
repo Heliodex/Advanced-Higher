@@ -32,7 +32,7 @@ function page.load(request): fw.Data
 	posts = utils.reverse(posts)
 
 	return {
-		username = username,
+		profileUsername = username,
 		posts = posts,
 	}
 end

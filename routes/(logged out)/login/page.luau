@@ -22,7 +22,7 @@ page.actions = {
 		end
 
 		local users = query(
-			"SELECT * FROM user WHERE username = ? AND password = ?",
+			"SELECT 1 FROM user WHERE username = ? AND password = ?",
 			username,
 			password
 		)
@@ -38,8 +38,6 @@ page.actions = {
 			newCookie,
 			username
 		)
-
-		print "Logged in"
 
 		return Redirect(302, "/", {
 			["set-cookie"] = `session={newCookie}; Path=/`,

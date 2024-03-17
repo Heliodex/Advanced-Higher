@@ -37,7 +37,7 @@ type Framework = {
 --[=[
 	Framework description
 ]=]
-local framework = {}
+local framework = {} :: Framework
 framework.__index = framework
 
 type Config = {
@@ -56,7 +56,7 @@ function framework:_log(colourName: stdio.Color, message: string)
 	)
 end
 
-local function logReq(request: net.ServeRequest, status: number, time: number)
+local function logReq(request: Request, status: number, time: number)
 	local timeTaken = math.round((os.clock() - time) * 1000000)
 	local method = request.method
 	local path = request.path
@@ -110,13 +110,13 @@ export type Data = { [string]: any }
 export type Request = net.ServeRequest
 export type Response = net.ServeResponse
 export type Page = {
-	load: ((request: net.ServeRequest, status: number, err: string?) -> Data)?,
+	load: ((request: Request, status: number, err: string?) -> Data)?,
 	actions: {
-		[string]: (request: net.ServeRequest) -> net.ServeResponse | string,
+		[string]: (request: Request) -> Response | string,
 	}?,
 }
 export type Layout = {
-	load: ((request: net.ServeRequest, status: number, err: string?) -> Data)?,
+	load: ((request: Request, status: number, err: string?) -> Data)?,
 }
 
 type PageFunction = () -> string
@@ -124,10 +124,10 @@ type PageFunction = () -> string
 local function loadRoute(
 	path: string,
 	filetype: string, -- "page" | "error" fux up the pcall
-	request: net.ServeRequest,
+	request: Request,
 	status: number,
 	err: string?
-): net.ServeResponse | string
+): Response | string
 	local filename = `{path}/page.luau`
 	local load: Data
 	local method = request.method
@@ -135,14 +135,12 @@ local function loadRoute(
 	if filetype == "page" then
 		local ok, pageServer: {
 			load: ((
-				request: net.ServeRequest,
+				request: Request,
 				status: number,
 				err: string?
 			) -> Data)?,
 			actions: {
-				[string]: (
-					request: net.ServeRequest
-				) -> net.ServeResponse | string,
+				[string]: (request: Request) -> Response | string,
 			}?,
 		} = pcall(
 			function()
@@ -198,7 +196,7 @@ local function loadRoute(
 	while true do
 		local ok2, layoutServer: {
 			load: ((
-				request: net.ServeRequest,
+				request: Request,
 				status: number,
 				err: string?
 			) -> Data)?,
@@ -360,8 +358,6 @@ end
 	Listens on the specified port.
 ]=]
 function framework:listen(port: number)
-	self:_log("green", `Listening on http://localhost:{port}/`)
-
 	net.serve(port, function(request)
 		local startTime = os.clock()
 		local path = request.path
@@ -432,6 +428,8 @@ function framework:listen(port: number)
 			body = "404 Not Found",
 		}
 	end)
+
+	self:_log("green", `Listening on http://localhost:{port}/`)
 end
 
 local createFramework = {

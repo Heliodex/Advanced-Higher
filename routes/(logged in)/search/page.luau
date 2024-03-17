@@ -30,8 +30,6 @@ function page.load(request): fw.Data
 	posts = algos.insertionSortBy(posts, "content")
 	local position = algos.binarySearchBy(posts, "content", search)
 
-	print(search, position, posts[4].content == search)
-
 	return if position < 0
 		then {
 			search = search,

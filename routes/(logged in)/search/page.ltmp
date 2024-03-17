@@ -1,6 +1,7 @@
 {#
 	local fw = require "framework"
 	local load = fw.component
+	local Post = load "Post"
 #}
 
 <form>
@@ -11,7 +12,7 @@
 <div style="padding-top: 1rem">
 	{# if search ~= "" and posts then #}
 		{# for _, post in posts do #}
-			{load "components/Post"(post)}
+			{Post(post)}
 		{# end #}
 	{# elseif search ~= "" and not posts then #}
 		<p>No results found</p>
