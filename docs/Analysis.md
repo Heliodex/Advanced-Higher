@@ -30,8 +30,10 @@ The full implementation of the site will include:
 
 ### Constraints
 
-Time: Since beginning the project on 23 November 2023, I have 4 months to complete the project before it should be submitted by 27 March 2024.  
-Cost: The project will have no development cost, as it will be using entirely free and open-source software.
+Time - Since beginning the project on 23 November 2023, I have 4 months to complete the project before it should be submitted by 27 March 2024.  
+Cost - The project will have no development cost, as it will be using entirely free and open-source software.  
+Technical - The main logic for the site (backend) will be written in Luau, as it's the language I'm most familiar with.
+Legal - The project will not store any personal data other than usernames and passwords, so should comply with all relevant data protection laws including the DPA and GDPR, and must also comply with the Copyright, Designs and Patents Act.
 
 ## UML use case diagram
 
@@ -49,9 +51,65 @@ The project's purpose is for users to be able to make and view posts on a microb
 -   When registering an account, the system will store the user's username and password in the database
 -   When logging in, the system will check the user's username and password against the database, and create a session if the details are correct
 
+These requirements need to be met for the project to function properly.
+
 ### End-user requirements
 
 -   A search function for finding posts by a keyword
--   A homepage for viewing all posts by all users in reverse chronological order
+-   A homepage for viewing all posts by all users in reverse chronological order (newest first)
+-   A profile page for viewing all posts by a specific user
+-   Easy navigation between all pages
+
+These requirements should be met to allow for a good user experience in the final site.
 
 ## Project plan
+
+### Analysis (9 days)
+
+-   Creation of project ideas: 1 day
+-   Implementation of basic prototypes, testing for suitability: 2.5 days
+-   Selection of final project idea: 4 hours
+-   Layout of scope, boundaries, and constraints: 2 days
+-   Creation of UML use case diagram: 1 day
+-   Creation of end-user requirements: 4 hours
+-   Creation of functional requirements: 4 hours
+-   Creation of project plan: 1 day
+
+### Design (1 week)
+
+-   Basic wireframe designs: 2 days
+-   Design notation for program processes (pseudocode): 3 days
+-   Design of database schema: 2 days
+
+### Implementation (3 weeks)
+
+-   Architecture of broad project structure: 2 days
+-   Implementation of user interface: 6 days
+-   Implementation of backend processes: 6 days
+-   Inclusion of algorithms - bubble sort, insertion sort, binary search: 3 days
+-   Implementation of database systems: 4 days
+
+### Testing (9 days)
+
+-   Creation of test plan: 2 days
+-   Creation of unit tests and cases: 3 days
+-   Carry out tests: 4 hours
+-   Description of problems found during testing: 1.5 days
+-   Debugging and fixing of discovered problems: 2 days
+
+### Evaluation (2 days)
+
+-   Evaluation of project: 1 day
+-   Discussion of project strengths and weaknesses: 4 hours
+-   Discussion of improvements that could be made: 4 hours
+
+### Finalisation (4.5 days)
+
+-   Finalisation of analysis: 4 hours
+-   Finalisation of design: 4 hours
+-   Finalisation of implementation: 4 hours
+-   Finalisation of testing: 4 hours
+-   Finalisation of evaluation: 4 hours
+-   Collection of evidence: 4 hours
+-   Formatting of evidence write-up: 1 day
+-   Submission of evidence: 4 hours
