@@ -1,0 +1,27 @@
+@startuml uml
+hide stereotype
+skinparam dpi 300
+skinparam DefaultFontName "Readex Pro Deca"
+skinparam linetype ortho
+skinparam rectangle {
+	borderStyle<<Logout>> dashed
+}
+
+rectangle Login
+rectangle Register
+rectangle Home
+rectangle Profile
+rectangle Search
+rectangle Logout<<Logout>>
+
+Login <<->> Register
+Register -->> Home
+Login ->> Home
+Home <<-->> Profile
+Home <<->> Search
+Profile <<->> Search
+Logout ->> Login
+Home ->> Logout
+Profile ->> Logout
+Search ->> Logout
+@enduml
