@@ -4,8 +4,12 @@ local fw = require "framework"
 local Redirect = fw.redirect
 local auth = {}
 
+function auth.parseCookie(cookie: string): string?
+	return cookie and string.match(cookie, "session=([^;]+)")
+end
+
 function auth.loggedOut(cookie: string): { redirect: fw.Response }?
-	local parsedCookie = cookie and string.match(cookie, "session=([^;]+)")
+	local parsedCookie = auth.parseCookie(cookie)
 
 	if parsedCookie then
 		local sessions =
@@ -22,7 +26,7 @@ function auth.loggedIn(cookie: string): {
 	redirect: fw.Response?,
 	cookie: string?,
 }
-	local parsedCookie = cookie and string.match(cookie, "session=([^;]+)")
+	local parsedCookie = auth.parseCookie(cookie)
 	if not parsedCookie then
 		return { redirect = Redirect(302, "/login") }
 	end

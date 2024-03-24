@@ -16,7 +16,6 @@ function query(content: string, ...: string | number): { any }?
 
 		local res = net.request {
 			url = url,
-			method = "POST",
 			body = net.jsonEncode {
 				query = content,
 				params = { ... },
@@ -26,24 +25,22 @@ function query(content: string, ...: string | number): { any }?
 		body = net.jsonDecode(res.body)
 	end
 
-	return if body.rows then body.rows else nil
+	return body.rows
 end
 
 print "running starter queries"
-query "CREATE DATABASE IF NOT EXISTS main"
-query "USE main"
 query [[
+	CREATE DATABASE IF NOT EXISTS main;
+	USE main;
 	CREATE TABLE IF NOT EXISTS user (
 		username VARCHAR(255) NOT NULL PRIMARY KEY,
 		password VARCHAR(255) NOT NULL
-	)]]
-query [[
+	);
 	CREATE TABLE IF NOT EXISTS session (
 		id VARCHAR(255) NOT NULL PRIMARY KEY,
 		username VARCHAR(255) NOT NULL,
 		FOREIGN KEY (username) REFERENCES user(username)
-	)]]
-query [[
+	);
 	CREATE TABLE IF NOT EXISTS post (
 		id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
 		time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,

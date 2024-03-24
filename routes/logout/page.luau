@@ -1,3 +1,4 @@
+local auth = require "auth"
 local query = require "db"
 
 local fw = require "framework"
@@ -11,12 +12,13 @@ end
 
 page.actions = {
 	default = function(request): fw.Response
-		local cookie = request.headers.cookie
-		cookie = cookie and string.match(cookie, "session=([^;]+)")
+	local parsedCookie = auth.parseCookie(request.headers.cookie)
 
-		query("DELETE FROM session WHERE id = ?", cookie)
+		if parsedCookie then
+			query("DELETE FROM session WHERE id = ?", parsedCookie)
+		end
 
-		return Redirect(302, "/")
+		return Redirect(302, "/login")
 	end,
 }
 

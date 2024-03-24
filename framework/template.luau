@@ -14,11 +14,14 @@ local function parseTemplate(str)
 	local i = 0
 
 	local function add(type)
-		table.insert(list, {
-			type = type,
-			-- trim whitespace (trimming newlines fux up html sometimes)
-			value = string.gsub(currentString, "^%s*(.-) *$", "%1"),
-		} :: Node)
+		table.insert(
+			list,
+			{
+				type = type,
+				-- trim whitespace (trimming newlines fux up html sometimes)
+				value = string.gsub(currentString, "^%s*(.-) *$", "%1"),
+			} :: Node
+		)
 		currentString = ""
 	end
 
@@ -96,7 +99,7 @@ return function(temp)
 
 	local chars = {}
 	-- Split string to chars
-	for i, _ in string.gmatch(temp, ".") do
+	for i in string.gmatch(temp, ".") do
 		table.insert(chars, i)
 	end
 

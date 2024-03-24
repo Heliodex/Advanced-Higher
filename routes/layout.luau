@@ -1,3 +1,4 @@
+local auth = require "auth"
 local query = require "db"
 
 local fw = require "framework"
@@ -8,9 +9,8 @@ type User = {
 }
 
 function layout.load(request): fw.Data
-	local cookie = string.match(request.headers.cookie or "", "session=([^;]+)")
-
-	if not cookie then
+	local parsedCookie = auth.parseCookie(request.headers.cookie)
+	if not parsedCookie then
 		return {
 			username = false,
 		}
@@ -21,7 +21,7 @@ function layout.load(request): fw.Data
 			SELECT user.username FROM user
 			JOIN session ON user.username = session.username
 			WHERE session.id = ?]],
-		cookie
+		parsedCookie
 	)
 
 	local user = users and users[1]

@@ -45,8 +45,26 @@ function utils.parseBody(body: string): { [string]: string }
 end
 
 function utils.timeSince(time: string): string
-	local year, month, day, hour, minute, second =
+	local myear, mmonth, mday, mhour, mminute, msecond =
 		string.match(time, "(%d+)-(%d+)-(%d+)T(%d+):(%d+):(%d+)")
+
+	local year = tonumber(myear)
+	local month = tonumber(mmonth)
+	local day = tonumber(mday)
+	local hour = tonumber(mhour)
+	local minute = tonumber(mminute)
+	local second = tonumber(msecond)
+
+	if
+		not year
+		or not month
+		or not day
+		or not hour
+		or not minute
+		or not second
+	then
+		return "unknown"
+	end
 
 	local now = os.time()
 	local ago = os.time {
