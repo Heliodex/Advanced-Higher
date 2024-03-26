@@ -2,9 +2,7 @@
 	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
 	"name": "Luau HTML Template",
 	"patterns": [
-		{
-			"include": "text.html.derivative"
-		},
+		{ "include": "text.html.derivative" },
 		{
 			"patterns": [
 				{
@@ -20,11 +18,7 @@
 							"name": "block.end.ltmp"
 						}
 					},
-					"patterns": [
-						{
-							"include": "source.luau"
-						}
-					]
+					"patterns": [{ "include": "source.luau" }]
 				},
 				{
 					"begin": "{",
@@ -39,11 +33,7 @@
 							"name": "interpolation.end.ltmp"
 						}
 					},
-					"patterns": [
-						{
-							"include": "source.luau"
-						}
-					]
+					"patterns": [{ "include": "source.luau" }]
 				}
 			]
 		}

@@ -110,6 +110,8 @@ USER ||--o{ POST: ""
 
 ![Website hierarchy](hierarchy.png)
 
+Accessing the logout page will immediately delete the user's session and redirect them to the login page.
+
 ### Server-side processes
 
 #### Database connection
@@ -191,4 +193,22 @@ Else
 
 ## User-interface design
 
-Wireframes go here
+### Homepage
+
+![Homepage wireframe](Homepage.png)
+
+### Profile
+
+![Profile wireframe](Profile.png)
+
+### Search
+
+![Search wireframe](Search.png)
+
+### Login
+
+![Login wireframe](Login.png)
+
+### Register
+
+![Register wireframe](Register.png)

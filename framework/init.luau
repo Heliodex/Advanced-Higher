@@ -331,7 +331,7 @@ local function getRoutePath(path: string): string?
 		end
 
 		if #possibleLayouts == 0 then
-			-- no layouts found, path aint there
+			-- no layouts found, path isn't there
 			return
 		end
 

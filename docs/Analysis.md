@@ -4,7 +4,7 @@
 
 Project idea: A basic microblogging platform. The end users of the application will be other students in the Computing Science class or club, to allow them to share thoughts and ideas, and post updates to projects they're working on.
 
-The platform will be a website with a frontend written in HTML and CSS for their compatibility with nearly all devices, and a backend written in Luau, as it's the language I'm most familiar with, alongside the Lune runtime (analagous to Luvit for Lua, or Node.js/Deno/Bun for Javascript). It will interface with a MySQL database to store user data, sessions, and posts.
+The platform will be a website with a frontend written in HTML and CSS for their compatibility with nearly all devices, and a backend written in Luau (v0.606), as it's the language I'm most familiar with, alongside the Lune (v0.8) runtime (analagous to Luvit for Lua, or Node.js/Deno/Bun for Javascript). It will interface with a MySQL database to store user data, sessions, and posts.
 
 The platform will relate to the Software Design and Development area of the course, as it uses the three specified algorithms: bubble sort, insertion sort, and binary search. It could also integrate with the Database Design and Development area of the course, as it uses an SQL database with three tables and opens a connection to send queries to it, as well as the Web Design and Development area of the course, as it uses a web user interface to d isplay the data.
 
@@ -84,10 +84,11 @@ These requirements should be met to allow for a good user experience in the fina
 ### Implementation (3 weeks)
 
 -   Architecture of broad project structure: 2 days
--   Implementation of user interface: 6 days
+-   Implementation of user interface: 5 days
 -   Implementation of backend processes: 6 days
 -   Inclusion of algorithms - bubble sort, insertion sort, binary search: 3 days
 -   Implementation of database systems: 4 days
+-   Write-up and research of new skills and concepts: 1 day
 
 ### Testing (9 days)
 
