@@ -3,6 +3,9 @@ local net = require "@lune/net"
 -- URL of a proxy to the database server (see db.ts)
 local url = "http://localhost:3307"
 
+--[=[
+	Runs a database query and returns the rows of the result.
+]=]
 function query(content: string, ...: string | number): { any }?
 	local body
 
@@ -16,6 +19,7 @@ function query(content: string, ...: string | number): { any }?
 
 		local res = net.request {
 			url = url,
+			method = "POST",
 			body = net.jsonEncode {
 				query = content,
 				params = { ... },

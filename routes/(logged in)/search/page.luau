@@ -21,7 +21,7 @@ function page.load(request): fw.Data
 	end
 
 	search = net.urlDecode(search)
-	search = string.gsub(search, "+", " ")
+	search = string.gsub(search, "+", " ") -- Spaces in URLs are encoded as '+' sometimes
 
 	local posts: { Post } = query [[
 		SELECT post.id, post.time, post.content, user.username FROM post

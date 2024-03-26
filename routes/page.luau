@@ -29,11 +29,8 @@ function page.load(request): fw.Data
 		return {}
 	end
 
-	posts = algos.bubbleSortBy(posts, "id")
-	posts = utils.reverse(posts)
-
 	return {
-		posts = posts,
+		posts = utils.reverse(algos.bubbleSortBy(posts, "id")),
 	}
 end
 

@@ -9,8 +9,8 @@ return function(
 	return {
 		_raw = true,
 		status = status,
-		headers = utils.merge({
-			Location = path,
-		}, headers or {}),
+		headers = if headers
+			then utils.merge({ Location = path }, headers)
+			else { Location = path },
 	}
 end

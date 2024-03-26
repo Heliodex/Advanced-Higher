@@ -1,6 +1,4 @@
--- templating engine for luau and html iguess
--- like etlua and penlight.template
--- not similar to lux or jsx or (sadly) htmlx
+-- Basic templating engine for Luau and HTML
 
 type Node = {
 	type: "string" | "block",
@@ -18,19 +16,11 @@ local function parseTemplate(str)
 			list,
 			{
 				type = type,
-				-- trim whitespace (trimming newlines fux up html sometimes)
+				-- trim whitespace (trimming newlines messes up html sometimes)
 				value = string.gsub(currentString, "^%s*(.-) *$", "%1"),
 			} :: Node
 		)
 		currentString = ""
-	end
-
-	local function next(n)
-		local nextChars = ""
-		for j = i, math.min(i + n - 1, #str) do
-			nextChars ..= str[j]
-		end
-		return nextChars
 	end
 
 	while i < #str do
@@ -52,7 +42,12 @@ local function parseTemplate(str)
 			while i < #str do
 				i += 1
 
-				if next(2) == "#}" then
+				local nextChars = ""
+				for j = i, math.min(i + 1, #str) do
+					nextChars ..= str[j]
+				end
+
+				if nextChars == "#}" then
 					if str[i - 1] == "\\" then
 						i += 1
 						currentString = string.sub(currentString, 1, -2) .. "#}"

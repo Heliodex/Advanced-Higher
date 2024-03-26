@@ -4,10 +4,17 @@ local fw = require "framework"
 local Redirect = fw.redirect
 local auth = {}
 
+--[=[
+	Parses the user's cookie to get the session token.
+]=]
 function auth.parseCookie(cookie: string): string?
 	return cookie and string.match(cookie, "session=([^;]+)")
 end
 
+--[=[
+	Checks if the user is logged out. If not, redirects to the home page.
+	Used to prevent logged in users from accessing pages only available to logged out users (eg. login, register)
+]=]
 function auth.loggedOut(cookie: string): { redirect: fw.Response }?
 	local parsedCookie = auth.parseCookie(cookie)
 
@@ -22,6 +29,10 @@ function auth.loggedOut(cookie: string): { redirect: fw.Response }?
 	return
 end
 
+--[=[
+	Checks if the user is logged in. If not, redirects to the login page.
+	Used to prevent logged out users from accessing pages only available to logged in users
+]=]
 function auth.loggedIn(cookie: string): {
 	redirect: fw.Response?,
 	cookie: string?,

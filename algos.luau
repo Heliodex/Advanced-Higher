@@ -1,6 +1,7 @@
 local algos = {}
 
-function algos.bubbleSort(list: { number | string })
+function algos.bubbleSort<T>(l: { T })
+	local list = (l :: unknown) :: { string | number }
 	local swapped = true
 	local n = #list
 	while swapped do
@@ -13,10 +14,11 @@ function algos.bubbleSort(list: { number | string })
 		end
 		n -= 1
 	end
-	return list
+	return (list :: unknown) :: { T }
 end
 
-function algos.bubbleSortBy(list: { any }, key: string)
+function algos.bubbleSortBy<T>(l: { T }, key: string)
+	local list = (l :: unknown) :: { { [string]: string | number } }
 	local swapped = true
 	local n = #list
 	while swapped do
@@ -29,10 +31,11 @@ function algos.bubbleSortBy(list: { any }, key: string)
 		end
 		n -= 1
 	end
-	return list
+	return (list :: unknown) :: { T }
 end
 
-function algos.insertionSort(list: { number | string })
+function algos.insertionSort<T>(l: { T })
+	local list = (l :: unknown) :: { string | number }
 	for i = 2, #list do
 		local value = list[i]
 		local index = i
@@ -42,10 +45,11 @@ function algos.insertionSort(list: { number | string })
 		end
 		list[index] = value
 	end
-	return list
+	return (list :: unknown) :: { T }
 end
 
-function algos.insertionSortBy(list: { any }, key: string)
+function algos.insertionSortBy<T>(l: { T }, key: string)
+	local list = (l :: unknown) :: { { [string]: string | number } }
 	for i = 2, #list do
 		local value = list[i]
 		local index = i
@@ -55,15 +59,17 @@ function algos.insertionSortBy(list: { any }, key: string)
 		end
 		list[index] = value
 	end
-	return list
+	return (list :: unknown) :: { T }
 end
 
-function algos.binarySearch(list: { string | number }, value: string | number)
+function algos.binarySearch<T>(l: { T }, v: T)
+	local list = (l :: unknown) :: { string | number }
+	local value = (v :: unknown) :: string | number
+
 	local left = 1
 	local right = #list
 	while left <= right do
-		local mid = math.floor((left + right) / 2)
-		-- local mid = (left + right) // 2
+		local mid = (left + right) // 2
 		if list[mid] == value then
 			return mid
 		elseif list[mid] < value then
@@ -83,8 +89,7 @@ function algos.binarySearchBy(
 	local left = 1
 	local right = #list
 	while left <= right do
-		local mid = math.floor((left + right) / 2)
-		-- local mid = (left + right) // 2
+		local mid = (left + right) // 2
 		if list[mid][key] == value then
 			return mid
 		elseif list[mid][key] < value then

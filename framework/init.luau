@@ -18,6 +18,10 @@ local reset = colour "reset"
 local yellow = colour "yellow"
 local cyan = colour "cyan"
 
+type Config = {
+	verbose: boolean?,
+}
+
 type Framework = {
 	-- The configuration for the framework.
 	config: Config?,
@@ -34,15 +38,8 @@ type Framework = {
 	__index: Framework,
 }
 
---[=[
-	Framework description
-]=]
 local framework = {} :: Framework
 framework.__index = framework
-
-type Config = {
-	verbose: boolean?,
-}
 
 function framework:_log(colourName: stdio.Color, message: string)
 	if not (self.config and self.config.verbose) then

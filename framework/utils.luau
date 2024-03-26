@@ -6,8 +6,8 @@ function utils.randomString(length: number): string
 	for _ = 1, length do
 		str ..= string.char(
 			if math.random(1, 2) == 1
-				then math.random(65, 90)
-				else math.random(97, 122)
+				then math.random(65, 90) -- A-Z
+				else math.random(97, 122) -- a-z
 		)
 	end
 	return str
@@ -26,7 +26,7 @@ function utils.merge(t1: { [string]: any }, t2: { [string]: any })
 	return t3
 end
 
-function utils.reverse(t: { [number]: any })
+function utils.reverse(t: { any })
 	local t2 = {}
 	for i = #t, 1, -1 do
 		table.insert(t2, t[i])
@@ -37,6 +37,10 @@ end
 function utils.parseBody(body: string): { [string]: string }
 	local t = {}
 	for k, v in string.gmatch(body, "([^&=]+)=([^&=]+)") do
+		if not v then
+			t[k] = ""
+			continue
+		end
 		v = string.gsub(v, "+", " ")
 		t[k] = net.urlDecode(v)
 	end
@@ -45,15 +49,15 @@ function utils.parseBody(body: string): { [string]: string }
 end
 
 function utils.timeSince(time: string): string
-	local myear, mmonth, mday, mhour, mminute, msecond =
-		string.match(time, "(%d+)-(%d+)-(%d+)T(%d+):(%d+):(%d+)")
+	local matched =
+		{ string.match(time, "(%d+)-(%d+)-(%d+)T(%d+):(%d+):(%d+)") }
 
-	local year = tonumber(myear)
-	local month = tonumber(mmonth)
-	local day = tonumber(mday)
-	local hour = tonumber(mhour)
-	local minute = tonumber(mminute)
-	local second = tonumber(msecond)
+	local year = tonumber(matched[1])
+	local month = tonumber(matched[2])
+	local day = tonumber(matched[3])
+	local hour = tonumber(matched[4])
+	local minute = tonumber(matched[5])
+	local second = tonumber(matched[6])
 
 	if
 		not year
@@ -66,8 +70,7 @@ function utils.timeSince(time: string): string
 		return "unknown"
 	end
 
-	local now = os.time()
-	local ago = os.time {
+	local diff = os.time() - os.time {
 		year = year,
 		month = month,
 		day = day,
@@ -76,8 +79,7 @@ function utils.timeSince(time: string): string
 		sec = second,
 	}
 
-	local diff = now - ago
-
+	-- Time units in seconds
 	local m = 60
 	local h = m * 60
 	local d = h * 24

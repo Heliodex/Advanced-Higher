@@ -1,7 +1,5 @@
 local compile = require "compile"
 
-type Data = { [string]: any }
-
 --[[
 	Compiles and returns a component from the given path.
 ]]

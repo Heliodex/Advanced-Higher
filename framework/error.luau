@@ -8,7 +8,7 @@ return function(
 	return {
 		_error = true,
 		status = status,
-		err = message or `Error ${status}`,
+		err = message or `Error {status}`,
 		headers = headers,
 	}
 end

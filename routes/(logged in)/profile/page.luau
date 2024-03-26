@@ -28,12 +28,9 @@ function page.load(request): fw.Data
 		username
 	) or {}
 
-	posts = algos.bubbleSortBy(posts, "id")
-	posts = utils.reverse(posts)
-
 	return {
 		profileUsername = username,
-		posts = posts,
+		posts = utils.reverse(algos.bubbleSortBy(posts, "id")),
 	}
 end
 
