@@ -4,7 +4,7 @@
 
 Project idea: A basic microblogging platform. The end users of the application will be other students in the Computing Science class or club, to allow them to share thoughts and ideas, and post updates to projects they're working on.
 
-The platform will be a website with a frontend written in HTML and CSS for their compatibility with nearly all devices, and a backend written in Luau (v0.606), as it's the language I'm most familiar with, alongside the Lune (v0.8) runtime (analagous to Luvit for Lua, or Node.js/Deno/Bun for Javascript). It will interface with a MySQL database to store user data, sessions, and posts.
+The platform will be a website with a frontend written in HTML and CSS for their compatibility with nearly all devices, and a backend written in Luau (v0.606), as it's the language I'm most familiar with (and my personal favourite), alongside the Lune (v0.8.0) runtime, analagous to Luvit for Lua, or Node.js/Deno/Bun for Javascript. It will interface with a MySQL (v8.0) database to store user data, sessions, and posts.
 
 The platform will relate to the Software Design and Development area of the course, as it uses the three specified algorithms: bubble sort, insertion sort, and binary search. It could also integrate with the Database Design and Development area of the course, as it uses an SQL database with three tables and opens a connection to send queries to it, as well as the Web Design and Development area of the course, as it uses a web user interface to d isplay the data.
 

@@ -2,6 +2,56 @@
 
 ## Design of Advanced Higher concepts
 
+Note that all array indices are 1-based in Luau, so the algorithms are designed with this in mind.
+
+### Bubble sort
+
+```
+Set list to the input list
+Set swapped to true
+Set n to the length of the list
+While swapped is true:
+	Set swapped to false
+	For i from 1 to n - 1:
+		If list[i] is greater than list[i + 1]:
+			Swap list[i] and list[i + 1]
+			Set swapped to true
+	Subtract 1 from n
+Return list
+```
+
+### Insertion sort
+
+```
+Set list to the input list
+For i from 2 to the length of the list:
+	Set value to list[i]
+	Set index to i
+	While index is greater than 1 and value is less than list[index - 1]:
+		Set list[index] to list[index - 1]
+		Subtract 1 from index
+	Set list[index] to value
+Return list
+```
+
+### Binary search
+
+```
+Set list to the input list
+Set value to the input value to find
+Set left to 1
+Set right to the length of the list
+While left is less than or equal to right:
+	Set mid to the floor of (left + right) / 2
+	If list[mid] is equal to value:
+		Return mid
+	Else if list[mid] is less than value:
+		Set left to mid + 1
+	Else:
+		Set right to mid - 1
+Return -1, signifying that the value was not found
+```
+
 ## Design of integration
 
 ### Query design
@@ -38,7 +88,6 @@ Where: id matches the session token in the cookie
 Select: post id, post time, post content, user username  
 Table: post  
 Join: user on post username = user username  
-Limit: 10
 
 #### Create post query
 
@@ -53,7 +102,6 @@ Select: post id, post time, post content, user username
 Table: post  
 Join: user where post username = user username  
 Where: user username matches the username provided in the URL  
-Limit: 10
 
 #### Search query
 
@@ -89,18 +137,18 @@ Username: varchar(255) (foreign key referencing user username)
 ```mermaid
 erDiagram
 USER {
-	varchar(255) username
+	varchar(20) username PK
 	varchar(255) password
 }
 SESSION {
-	varchar(255) id
-	varchar(255) username
+	varchar(64) id PK
+	varchar(20) username FK
 }
 POST {
-	int id
+	int id PK
 	datetime time
 	text content
-	varchar(255) username
+	varchar(20) username FK
 }
 USER ||--o{ SESSION: ""
 USER ||--o{ POST: ""
@@ -189,6 +237,16 @@ Else if the session does not exist and the user is trying to access a page that 
 	Redirect the user to the login page
 Else
 	Display the requested page
+```
+
+#### Post creation
+
+```
+Authenticate the user
+Get the body from the request
+Parse the request body to find the post content
+If the post content is empty:
+	Return an error message
 ```
 
 ## User-interface design
