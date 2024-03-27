@@ -116,11 +116,9 @@ export type Layout = {
 	load: ((request: Request, status: number, err: string?) -> Data)?,
 }
 
-type PageFunction = () -> string
-
 local function loadRoute(
 	path: string,
-	filetype: string, -- "page" | "error" fux up the pcall
+	filetype: "page" | "error",
 	request: Request,
 	status: number,
 	err: string?
@@ -154,10 +152,10 @@ local function loadRoute(
 				load._raw = nil
 				return load
 			elseif load._error == true then
-				return loadRoute(path, "+error", request, load.status, load.err)
+				return loadRoute(path, "error", request, load.status, load.err)
 			end
 		elseif method == "POST" and ok and pageServer.actions then
-			local action = request.query[""] or "default"
+			local action = request.query[""] or "default" -- Page action is specified in a query parameter
 			local actionFunc = pageServer.actions[action]
 
 			if actionFunc then
@@ -212,7 +210,7 @@ local function loadRoute(
 			elseif layoutLoad._error == true then
 				return loadRoute(
 					path,
-					"+error",
+					"error",
 					request,
 					layoutLoad.status,
 					layoutLoad.err
@@ -257,12 +255,12 @@ local function loadRoute(
 	end
 
 	if not templated then
-		local pageok, page: PageFunction = pcall(luau.load, compiled, {
+		local pageok, page: () -> string = pcall(luau.load, compiled, {
 			environment = load,
 		})
 
 		if not pageok then
-			if filetype == "+error" then
+			if filetype == "error" then
 				load = {
 					status = status,
 					error = err,
@@ -300,8 +298,8 @@ local function loadRoute(
 end
 
 local function getRoutePath(path: string): string?
-	-- check if "routes/testing/beu/page.ltmp" exists,
-	-- but also check if "routes/(layout)/testing/beu" exists
+	-- check if "routes/testing/something/page.ltmp" exists,
+	-- but also check if "routes/(layout)/testing/something" exists
 	-- (layouts are enclosed in parentheses)
 
 	-- split the path into parts
@@ -351,6 +349,70 @@ local function getRoutePath(path: string): string?
 	return table.concat(parts, "/")
 end
 
+-- Serve content from the specified public directory
+local function servePublic(
+	request: Request,
+	public: string,
+	path: string,
+	startTime: number
+): (Response | string)?
+	local filename = public .. path
+	local ok, readFile = pcall(fs.readFile, filename)
+	if ok then
+		logReq(request, 200, startTime)
+		return {
+			status = 200,
+			body = readFile,
+			headers = {
+				["Cache-Control"] = "max-age=31536000",
+			},
+		}
+	end
+	return
+end
+
+-- Serve pages from the specified routes directory
+local function serveRoutes(
+	request: Request,
+	routes: string,
+	path: string,
+	startTime: number
+): (Response | string)?
+	if routes then
+		local basePath = routes .. path
+		local gotPath = getRoutePath(basePath) or basePath
+
+		local routePageFilename = `{gotPath}/page.ltmp`
+		local routeServerFilename = `{gotPath}/page.luau`
+
+		local pageOk, isRoutePage = pcall(fs.isFile, routePageFilename)
+		local serverOk, isRouteServer = pcall(fs.isFile, routeServerFilename)
+		if (pageOk and isRoutePage) or (serverOk and isRouteServer) then
+			local routeok, res =
+				pcall(loadRoute, gotPath, "page" :: "page", request, 200)
+
+			if not routeok then
+				stdio.ewrite(`{res}\n`)
+				return loadRoute(gotPath, "error", request, 500, tostring(res))
+			end
+
+			logReq(request, 200, startTime)
+			if type(res) == "string" then
+				-- otherwise headers are ignored or something idk
+				return {
+					status = 200,
+					body = res,
+				}
+			end
+			return res
+		end
+
+		logReq(request, 404, startTime)
+		return loadRoute(gotPath, "error", request, 404, "Not Found")
+	end
+	return
+end
+
 --[=[
 	Listens on the specified port.
 ]=]
@@ -364,59 +426,17 @@ function framework:listen(port: number)
 		end
 
 		if self._public then
-			local filename = self._public .. path
-			local ok, readFile = pcall(fs.readFile, filename)
-			if ok then
-				logReq(request, 200, startTime)
-				return {
-					status = 200,
-					body = readFile,
-					headers = {
-						["Cache-Control"] = "max-age=31536000",
-					},
-				}
+			local res = servePublic(request, self._public, path, startTime)
+			if res then
+				return res
 			end
 		end
 
 		if self._routes then
-			local basePath = self._routes .. path
-			local gotPath = getRoutePath(basePath) or basePath
-
-			local routePageFilename = `{gotPath}/page.ltmp`
-			local routeServerFilename = `{gotPath}/page.luau`
-
-			local pageOk, isRoutePage = pcall(fs.isFile, routePageFilename)
-			local serverOk, isRouteServer =
-				pcall(fs.isFile, routeServerFilename)
-			if (pageOk and isRoutePage) or (serverOk and isRouteServer) then
-				local routeok, res =
-					pcall(loadRoute, gotPath, "page", request, 200)
-
-				if not routeok then
-					stdio.ewrite(`{res}\n`)
-					return loadRoute(
-						gotPath,
-						"+error",
-						request,
-						500,
-						tostring(res)
-					)
-				end
-
-				logReq(request, 200, startTime)
-
-				if type(res) == "string" then
-					-- otherwise headers are ignored or something idk
-					return {
-						status = 200,
-						body = res,
-					}
-				end
+			local res = serveRoutes(request, self._routes, path, startTime)
+			if res then
 				return res
 			end
-
-			logReq(request, 404, startTime)
-			return loadRoute(gotPath, "error", request, 404, "Not Found")
 		end
 
 		logReq(request, 404, startTime)

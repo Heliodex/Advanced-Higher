@@ -2,9 +2,9 @@
 	<fieldset>
 		<legend>Register</legend>
 		<label for="username">Username</label>
-		<input type="text" name="username" />
+		<input type="text" name="username" required minlength="3" maxlength="20" />
 		<label for="password">Password</label>
-		<input type="password" name="password"/>
+		<input type="password" name="password" required />
 		<button>Register</button>
 		<small id="invalid">
 			The username or password is invalid.
@@ -12,11 +12,14 @@
 		<small id="taken">
 			This username is already taken.
 		</small>
+		<small id="length">
+			Your username must be between 3 and 20 characters long.
+		</small>
 	</fieldset>
 </form>
 
 <style>
-	#invalid, #taken \\{
+	#invalid, #taken, #length \\{
 		display: none;
 		color: red;
 		&:target \\{

@@ -10,6 +10,9 @@ Welcome home, {username}!
 	<textarea type="text" name="content" rows="3" cols="40" required></textarea>
 	<br />
 	<button type="submit">Post</button>
+	<small id="empty">
+		The content of the post cannot be empty.
+	</small>
 </form>
 
 Recent posts
@@ -17,3 +20,13 @@ Recent posts
 {# for _, post in posts do #}
 	{Post(post)}
 {# end #}
+
+<style>
+	#empty \\{ /* Escape opening braces to prevent them from being interpolated as expressions */
+		display: none;
+		color: red;
+		&:target \\{
+			display: block;
+		}
+	}
+</style>

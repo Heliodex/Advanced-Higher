@@ -22,15 +22,17 @@ function page.load(request): fw.Data
 
 	local posts: { Post }? = query [[
 		SELECT post.id, post.time, post.content, user.username FROM post
-		JOIN user ON post.username = user.username
-		LIMIT 10]]
+		JOIN user ON post.username = user.username]]
 
 	if not posts then
 		return {}
 	end
 
+	posts = algos.bubbleSortBy(posts, "id")
+	posts = utils.reverse(posts)
+
 	return {
-		posts = utils.reverse(algos.bubbleSortBy(posts, "id")),
+		posts = utils.cut(posts, 10),
 	}
 end
 
@@ -42,6 +44,10 @@ page.actions = {
 		end
 
 		local content = utils.parseBody(request.body).content
+
+		if not content or content == "" then
+			return Redirect(302, "/#empty")
+		end
 
 		query(
 			[[

@@ -23,14 +23,16 @@ function page.load(request): fw.Data
 		[[
 			SELECT post.id, post.time, post.content, user.username FROM post
 			JOIN user ON post.username = user.username
-			WHERE user.username = ?
-			LIMIT 10]],
+			WHERE user.username = ?]],
 		username
 	) or {}
 
+	posts = algos.bubbleSortBy(posts, "id")
+	posts = utils.reverse(posts)
+
 	return {
 		profileUsername = username,
-		posts = utils.reverse(algos.bubbleSortBy(posts, "id")),
+		posts = utils.cut(posts, 10),
 	}
 end
 

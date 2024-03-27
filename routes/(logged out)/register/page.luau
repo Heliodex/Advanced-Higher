@@ -17,8 +17,12 @@ page.actions = {
 		local username = string.lower(body.username or "")
 		local password = body.password
 
-		if not username or not password then
+		if not username or not password or username == "" or password == "" then
 			return Redirect(302, "/register#invalid")
+		end
+
+		if 3 > #username or #username > 20 then
+			return Redirect(302, "/register#length")
 		end
 
 		local users = query("SELECT 1 FROM user WHERE username = ?", username)
@@ -29,7 +33,8 @@ page.actions = {
 
 		local newCookie = utils.randomString(64)
 
-		-- cant be bothered to hash passwords
+		-- can't be bothered to hash passwords
+		-- or, more accurately, can't be bothered to implement a hashing function in basically pure luau
 		query(
 			"INSERT INTO user (username, password) VALUES (?, ?)",
 			username,

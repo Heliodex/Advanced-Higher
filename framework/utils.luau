@@ -1,6 +1,9 @@
 local net = require "@lune/net"
 local utils = {}
 
+--[=[
+	Generates a random string of uppercase and lowercase letters of a given length.
+]=]
 function utils.randomString(length: number): string
 	local str = ""
 	for _ = 1, length do
@@ -13,6 +16,9 @@ function utils.randomString(length: number): string
 	return str
 end
 
+--[=[
+	Merges two tables into a new table. Identical keys in the second table will override the first table's keys.
+]=]
 function utils.merge(t1: { [string]: any }, t2: { [string]: any })
 	local t3 = {}
 
@@ -26,7 +32,10 @@ function utils.merge(t1: { [string]: any }, t2: { [string]: any })
 	return t3
 end
 
-function utils.reverse(t: { any })
+--[=[
+	Reverses the contents of an array.
+]=]
+function utils.reverse<T>(t: { T })
 	local t2 = {}
 	for i = #t, 1, -1 do
 		table.insert(t2, t[i])
@@ -34,6 +43,20 @@ function utils.reverse(t: { any })
 	return t2
 end
 
+--[=[
+	Cuts an array to a specified length.
+]=]
+function utils.cut<T>(t: { T }, num: number)
+	local t2 = {}
+	for i = 1, num do
+		table.insert(t2, t[i])
+	end
+	return t2
+end
+
+--[=[
+	Parses the body of a POST request into a table.
+]=]
 function utils.parseBody(body: string): { [string]: string }
 	local t = {}
 	for k, v in string.gmatch(body, "([^&=]+)=([^&=]+)") do
@@ -48,6 +71,9 @@ function utils.parseBody(body: string): { [string]: string }
 	return t
 end
 
+--[=[
+	Calculate the time since a given time, returning a human-readable string.
+]=]
 function utils.timeSince(time: string): string
 	local matched =
 		{ string.match(time, "(%d+)-(%d+)-(%d+)T(%d+):(%d+):(%d+)") }
@@ -70,14 +96,15 @@ function utils.timeSince(time: string): string
 		return "unknown"
 	end
 
-	local diff = os.time() - os.time {
-		year = year,
-		month = month,
-		day = day,
-		hour = hour,
-		min = minute,
-		sec = second,
-	}
+	local diff = os.time()
+		- os.time {
+			year = year,
+			month = month,
+			day = day,
+			hour = hour,
+			min = minute,
+			sec = second,
+		}
 
 	-- Time units in seconds
 	local m = 60

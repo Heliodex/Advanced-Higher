@@ -2,6 +2,7 @@ local algos = {}
 
 function algos.bubbleSort<T>(l: { T })
 	local list = (l :: unknown) :: { string | number }
+
 	local swapped = true
 	local n = #list
 	while swapped do
@@ -19,6 +20,7 @@ end
 
 function algos.bubbleSortBy<T>(l: { T }, key: string)
 	local list = (l :: unknown) :: { { [string]: string | number } }
+
 	local swapped = true
 	local n = #list
 	while swapped do
@@ -36,6 +38,7 @@ end
 
 function algos.insertionSort<T>(l: { T })
 	local list = (l :: unknown) :: { string | number }
+
 	for i = 2, #list do
 		local value = list[i]
 		local index = i
@@ -50,6 +53,7 @@ end
 
 function algos.insertionSortBy<T>(l: { T }, key: string)
 	local list = (l :: unknown) :: { { [string]: string | number } }
+
 	for i = 2, #list do
 		local value = list[i]
 		local index = i
@@ -65,6 +69,15 @@ end
 function algos.binarySearch<T>(l: { T }, v: T)
 	local list = (l :: unknown) :: { string | number }
 	local value = (v :: unknown) :: string | number
+
+	-- Search for duplicate items
+	local seen = {}
+	for _, v in list do
+		if seen[v] then
+			return -1 -- Exit and return not found, as this list is not supported
+		end
+		seen[v] = true
+	end
 
 	local left = 1
 	local right = #list
