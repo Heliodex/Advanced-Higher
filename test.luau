@@ -53,7 +53,7 @@ for _, sort in sortingByAlgos do
 	assert(tableEqual(sort(unsortedObjects, "id"), sortedObjects))
 end
 
--- Test searching (algos.binarySearch)
+-- Test searching
 for i, v in array do
 	assert(algos.binarySearch(array, v) == i)
 end

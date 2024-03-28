@@ -1,3 +1,5 @@
+-- All requests to pages that require a user to be logged out should go through this layout
+
 local auth = require "auth"
 
 local fw = require "framework"

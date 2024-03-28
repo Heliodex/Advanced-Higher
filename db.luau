@@ -11,7 +11,7 @@ function query(content: string, ...: string | number): { any }?
 
 	for _ = 1, 2 do
 		if body and body.error then
-			print "retrying query"
+			print "retrying query" -- Queries sometimes fail on the first try
 			query "USE main"
 		elseif body then
 			break

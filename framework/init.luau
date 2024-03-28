@@ -1,3 +1,6 @@
+-- This file is the entry point for the framework.
+-- It contains the main server logic, filesystem-based routing, and serving static files.
+
 local fs = require "@lune/fs"
 local luau = require "@lune/luau"
 local net = require "@lune/net"

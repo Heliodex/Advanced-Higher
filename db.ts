@@ -1,6 +1,6 @@
 // This basic proxy only exists because the main application, written in Luau, doesn't have the capability to interact with MySQL.
 
-import { Client } from "https://deno.land/x/mysql@v2.12.1/mod.ts";
+import { Client } from "https://deno.land/x/mysql@v2.12.1/mod.ts"
 
 const client = await new Client().connect({
 	hostname: "localhost",
