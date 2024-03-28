@@ -18,7 +18,7 @@ The results of testing with both unit tests and manual test tables have shown th
 
 ## Results of testing
 
-The results of tests showed that most features were working as expected, and that any issues were able to be resolved with minor changes to the code. Addition of client-side validation to the HTML forms was also successful, improving the user experience by providing instant feedback when a form was submitted with invalid data.
+The results of the tests showed that most features were working as expected, and that any issues were able to be resolved with minor changes to the code. The addition of client-side validation to the HTML forms was also successful, improving the user experience by providing instant feedback when a form was submitted with invalid data.
 
 ## Future maintainability
 
@@ -30,4 +30,4 @@ While these solutions were helpful as a learning experience during the project, 
 
 ## Robustness
 
-Use of input validation, good error handling, and unit tests increase the project's robustness against common attacks and errors. Unit tests can be re-ran after modifying a function to ensure that it still works as expected, and error handling will display an error page with a corresponding HTTP status code if an error occurs during the request, rather than crashing the server and causing the request to time out.
+Use of input validation, good error handling, and unit tests increase the project's robustness against common attacks and errors. Unit tests can be re-run after modifying a function to ensure that it still works as expected, and error handling will display an error page with a corresponding HTTP status code if an error occurs during the request, rather than crashing the server and causing the request to time out.

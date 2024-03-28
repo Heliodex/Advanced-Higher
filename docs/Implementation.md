@@ -51,11 +51,10 @@ However, this changed the types of data each algorithm could take as arguments a
 
 During testing, it was found that it needed to support page actions, allowing the same page to accept requests of multiple types, such as GET and POST for pages with forms. This was implemented by adding an `page.actions` field to the table returned by every page, and allowing the router to call the correct action based on a query parameter in the request, otherwise using the `default` action.
 
-A second issue that occured was due to the same code for posts being reused on many pages across the site, however the code couldn't be easily extracted into a function because of the frontend using a templating system. To solve this, the templating system was modified with a component system, exposed as a Load function, that allowed template files in the `/components` directory to be loaded and reused in other templates on multiple pages, increasing modularity and reducing code duplication.
+A second issue that occurred was due to the same code for posts being reused on many pages across the site, however the code couldn't be easily extracted into a function because of the frontend using a templating system. To solve this, the templating system was modified with a component system, exposed as a Load function, that allowed template files in the `/components` directory to be loaded and reused in other templates on multiple pages, increasing modularity and reducing code duplication.
 
 Another issue was the potential usability or performance problems when loading huge lists of posts. To solve this, posts were cut to a maximum of 10 on the home and profile pages, though the search system can still be used to find older posts. Extremely long usernames would also cause issues with storing them in the database and displaying them on the site, so a username length of between 3 and 20 characters was enforced.
 
 ![Error message displayed when a username is too long](screenshots/Register-input3.png)
 
 A final issue was the lack of syntax highlighting for custom Luau templating files in the text editor used to write the code, Visual Studio Code. This was solved by creating a custom syntax highlighting extension for the `.ltmp` file extension, which was simple as it only had to embed existing Luau and HTML syntax highlighting, delimited by the `{# #}` and `{ }` characters.
-

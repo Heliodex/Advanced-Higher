@@ -240,7 +240,7 @@ local function loadRoute(
 		-- bubble up the directory tree, looking for an error template
 		while true do
 			print("compiling error template", path)
-			local layout = compile(path, "+error")
+			local layout = compile(path, "error")
 
 			if layout then
 				templated = layout(load)
