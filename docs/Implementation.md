@@ -55,5 +55,7 @@ A second issue that occured was due to the same code for posts being reused on m
 
 Another issue was the potential usability or performance problems when loading huge lists of posts. To solve this, posts were cut to a maximum of 10 on the home and profile pages, though the search system can still be used to find older posts. Extremely long usernames would also cause issues with storing them in the database and displaying them on the site, so a username length of between 3 and 20 characters was enforced.
 
+![Error message displayed when a username is too long](screenshots/Register-input3.png)
+
 A final issue was the lack of syntax highlighting for custom Luau templating files in the text editor used to write the code, Visual Studio Code. This was solved by creating a custom syntax highlighting extension for the `.ltmp` file extension, which was simple as it only had to embed existing Luau and HTML syntax highlighting, delimited by the `{# #}` and `{ }` characters.
 

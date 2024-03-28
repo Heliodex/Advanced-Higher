@@ -3,36 +3,29 @@
 }
 
 body {
-	background: #221815;
-	color: white;
+	background: #eee;
 	max-width: 40rem;
 	padding: 0.5rem;
 	margin: 0 auto;
 }
 
-a {
-	color: cyan;
-}
-
 .post {
 	margin: 0.5rem;
 	padding: 0.5rem;
-	background: #423835;
+	background: white;
 	border-radius: 0.8rem;
 	max-width: 40rem;
 }
 
 button {
-	background: #423835;
-	color: white;
+	background: #ccc;
 	border: none;
 	padding: 0.3rem 0.6rem;
 	border-radius: 0.5rem;
 }
 
 textarea, input {
-	background: #423835;
-	color: white;
+	background: #ccc;
 	font-size: large;
 	max-width: 40ch;
 	border-radius: 0.5rem;
@@ -45,14 +38,14 @@ textarea {
 }
 
 fieldset {
-	background: #180e0b;
+	background: white;
 	border: none;
 	border-radius: 0.75rem;
 	padding: 1rem;
 }
 
 legend {
-	background: #524845;
+	background: #ccc;
 	border-radius: 0.4rem;
 	padding: 0.2rem 0.5rem;
 }

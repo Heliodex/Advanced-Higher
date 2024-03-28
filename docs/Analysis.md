@@ -14,7 +14,7 @@ The scope of the project will include:
 
 -   A full design of the site, including database schema, user interface wireframes, UML diagrams, query designs, and pseudocode for all used algorithms.
 -   A full implementation of the site, including database, backend, and frontend.
--   A completed test plan, including unit tests, personas, test cases, and expected results.
+-   A completed table of manual and unit tests, including test cases and test results.
 -   Evaluation of the project, including a discussion of the project's strengths and weaknesses, and a reflection on the development process.
 
 ### Boundaries
@@ -47,7 +47,7 @@ The project's purpose is for users to be able to make and view posts on a microb
 
 -   The system shall store user data, sessions, and posts in a database
 -   The site will use a navigation bar to allow users to easily navigate between home, profile, search, and logout pages
--   All user input will be validated to prevent attacks such as cross-site scripting
+-   All user input will be validated to prevent attacks that attempt to break the site's database or display mechanisms
 -   When registering an account, the system will store the user's username and password in the database
 -   When logging in, the system will check the user's username and password against the database, and create a session if the details are correct
 
@@ -55,9 +55,9 @@ These requirements need to be met for the project to function properly.
 
 ### End-user requirements
 
--   A search function for finding posts by a keyword
--   A homepage for viewing all posts by all users in reverse chronological order (newest first)
--   A profile page for viewing all posts by a specific user
+-   A search function for finding posts by their content
+-   A homepage for viewing recent posts by all users in reverse chronological order (newest first)
+-   A profile page for viewing recent posts by a specific user
 -   Easy navigation between all pages
 
 These requirements should be met to allow for a good user experience in the final site.

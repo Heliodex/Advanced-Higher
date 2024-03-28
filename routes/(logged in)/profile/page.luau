@@ -19,6 +19,12 @@ function page.load(request): fw.Data
 		return Error(400, "No user specified")
 	end
 
+	local users = query("SELECT 1 FROM user WHERE username = ?", username)
+
+	if not (users and users[1]) then
+		return Error(404, "User not found")
+	end
+
 	local posts: { Post } = query(
 		[[
 			SELECT post.id, post.time, post.content, user.username FROM post

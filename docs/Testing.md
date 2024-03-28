@@ -1,6 +1,6 @@
 # Testing the solution
 
-Both a test table and unit tests were created to ensure the solution was working as intended. Unit tests for Advanced Higher algorithms were stored in the `test.luau` file, and the corresponding test table is displayed below.
+Both a test table and unit tests were created to ensure the solution was working as intended. Unit tests for Advanced Higher algorithms were stored in the `test.luau` file, and the corresponding test table is displayed below. All tests were repeated using normal, extreme, and exceptional test data where applicable to ensure the system was robust and could handle a variety of inputs.
 
 ## Advanced Higher algorithms
 
@@ -26,7 +26,7 @@ Outcome: Pass
 
 Type: Exceptional  
 Test data: { "string", 6, 3, 8, 2, 7, 5, 9, 1 }  
-Expected result: attempt to compare string < number  
+Expected result: attempt to compare string < number (error message)  
 Actual result: attempt to compare string < number  
 Outcome: Pass
 
@@ -52,7 +52,7 @@ Outcome: Pass
 
 Type: Exceptional  
 Test data: { "string", 6, 3, 8, 2, 7, 5, 9, 1 }  
-Expected result: attempt to compare string < number  
+Expected result: attempt to compare string < number (error message)  
 Actual result: attempt to compare string < number  
 Outcome: Pass
 
@@ -184,3 +184,7 @@ Outcome: Pass
 Most tests passed successfully, with only one failure in the binary search algorithm. This was due to the algorithm searching from the middle of the list, rather than the start, causing it to return a different index of the value than the expected first if there were duplicate entries in the list. This was solved by checking for duplicates in the list beforehand, then returning -1 if any duplicates were found. However, this is not a perfect solution as it compromises the efficiency and accuracy of the algorithm, though ended up being sufficient for the purposes of the project.
 
 Furthermore, although the tests for input validation were all successful, the system was modified to also support client-side validation in HTML forms to provide a better user experience. Identical tests were run on the client-side validation, and all passed successfully.
+
+![Client-side validation on Home page](screenshots/Home-input1.png)
+![Client-side validation on Login page](screenshots/Login-input1.png)
+![Client-side validation on Register page](screenshots/Register-input1.png)

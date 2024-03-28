@@ -24,7 +24,7 @@
 			</nav>
 			<br />
 		</header>
-		{SLOT}
+		{SLOT} <!-- This is where page content will be inserted -->
 	</body>
 	<style>
 		h1 \\{
