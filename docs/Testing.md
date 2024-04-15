@@ -175,8 +175,15 @@ Outcome: Pass
 ### Testing user logout
 
 Type: Normal  
+Test data: Cookie exists in the database; user is logged in  
 Expected result: Cookie deleted, redirect to the login page  
 Actual result: Cookie deleted, redirect to the login page  
+Outcome: Pass
+
+Type: Normal  
+Test data: Cookie does not exist in the database; user is already logged out  
+Expected result: Redirect to the login page  
+Actual result: Redirect to the login page  
 Outcome: Pass
 
 ## Results
@@ -188,3 +195,5 @@ Furthermore, although the tests for input validation were all successful, the sy
 ![Client-side validation on Home page](screenshots/Home-input1.png)
 ![Client-side validation on Login page](screenshots/Login-input1.png)
 ![Client-side validation on Register page](screenshots/Register-input1.png)
+
+Usability testing on the site also proved successful, with all features working as expected and providing a ease of use and a good user experience, meeting all end-user requirements. Multiple popular web browsers were tested for compatibility with the site, all of which were able to display it correctly and allow users to interact with it as intended.

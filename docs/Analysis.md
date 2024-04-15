@@ -2,11 +2,11 @@
 
 ## Description of the problem
 
-Project idea: A basic microblogging platform. The end users of the application will be other students in the Computing Science class or club, to allow them to share thoughts and ideas, and post updates to projects they're working on.
+My project idea is for a basic microblogging platform. The end users of the application will be other students in the Computing Science class or club, to allow them to share thoughts and ideas, and post updates to projects they're working on.
 
 The platform will be a website with a frontend written in HTML and CSS for their compatibility with nearly all devices, and a backend written in Luau (v0.606), as it's the language I'm most familiar with (and my personal favourite), alongside the Lune (v0.8.0) runtime, analagous to Luvit for Lua, or Node.js/Deno/Bun for Javascript. It will interface with a MySQL (v8.0) database to store user data, sessions, and posts.
 
-The platform will relate to the Software Design and Development area of the course, as it uses the three specified algorithms: bubble sort, insertion sort, and binary search. It could also integrate with the Database Design and Development area of the course, as it uses an SQL database with three tables and opens a connection to send queries to it, as well as the Web Design and Development area of the course, as it uses a web user interface to d isplay the data.
+The platform will relate to the Software Design and Development area of the course, as it uses the three specified algorithms: bubble sort, insertion sort, and binary search. It could also integrate with the Database Design and Development area of the course, as it uses an SQL database with three tables and opens a connection to send queries to it, as well as the Web Design and Development area of the course, as it uses a web user interface to display the data.
 
 ### Scope
 
@@ -21,16 +21,16 @@ The scope of the project will include:
 
 The full implementation of the site will include:
 
--   A registration system, allowing users to create an account by providing a username and password, and storing this information in a database
--   A login system, allowing users to log in to their account by providing their username and password, and checking this information against the database
--   A session system, allowing users to remain logged in for a period of time, and to log out of their account by deleting their session from the database
--   A post system, allowing users to create posts, view all posts, view posts by a specific user, and search for posts by keyword by using binary search
--   Validation of all user input, to prevent attacks such as cross-site scripting
--   Ability to sort posts by date, using bubble sort and insertion sort
+-   A registration system, allowing users to create an account by providing a username and password, and storing this information in a database.
+-   A login system, allowing users to log in to their account by providing their username and password, and checking this information against the database.
+-   A session system, allowing users to remain logged in for a period of time, and to log out of their account by deleting their session from the database.
+-   A post system, allowing users to create posts, view all posts, view posts  by a specific user, and search for posts by keyword by using binary search.
+-   Validation of all user input, to prevent attacks such as cross-site scripting (XSS) or SQL injection.
+-   Ability to sort posts by date from newest to oldest, using bubble sort and insertion sort.
 
 ### Constraints
 
-Time - Since beginning the project on 23 November 2023, I have 4 months to complete the project before it should be submitted by 27 March 2024.  
+Time - Since beginning the project on 23 November 2023, I have between 4 and 5 months to complete the project before it should be submitted by 15 April 2024.  
 Cost - The project will have no development cost, as it will be using entirely free and open-source software.  
 Technical - The main logic for the site (backend) will be written in Luau, as it's the language I'm most familiar with.
 Legal - The project will not store any personal data other than usernames and passwords, so should comply with all relevant data protection laws including the DPA and GDPR, and must also comply with the Copyright, Designs and Patents Act.
@@ -45,22 +45,22 @@ The project's purpose is for users to be able to make and view posts on a microb
 
 ### Functional requirements
 
--   The system shall store user data, sessions, and posts in a database
--   The site will use a navigation bar to allow users to easily navigate between home, profile, search, and logout pages
--   All user input will be validated to prevent attacks that attempt to break the site's database or display mechanisms
--   When registering an account, the system will store the user's username and password in the database
--   When logging in, the system will check the user's username and password against the database, and create a session if the details are correct
+-   The system shall store user data, sessions, and posts in a database.
+-   The site will use a navigation bar to allow users to easily navigate between home, profile, search, and logout pages.
+-   All user input will be validated to prevent attacks that attempt to break the site's database or display mechanisms.
+-   When registering an account, the system will store the user's username and password in the database.
+-   When logging in, the system will check the user's username and password against the database and create a session if the details are correct.
 
 These requirements need to be met for the project to function properly.
 
 ### End-user requirements
 
--   A search function for finding posts by their content
--   A homepage for viewing recent posts by all users in reverse chronological order (newest first)
+-   A search function for finding posts by their content.
+-   A homepage for viewing recent posts by all users in reverse chronological order (newest first).
 -   A profile page for viewing recent posts by a specific user
--   Easy navigation between all pages
+-   Easy navigation between all pages.
 
-These requirements should be met to allow for a good user experience in the final site.
+These requirements should be met to allow for good user experience in the final site.
 
 ## Project plan
 

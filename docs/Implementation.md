@@ -41,7 +41,7 @@ If future performance or lower resource usage is required in the future, these f
 
 For the database, a very simple proxy server was used to handle incoming requests from the website and run them as queries on the database. It was written in Typescript, and was required because Luau does not have built-in support for MySQL or other database systems.
 
-I have used systems like server-side routing, templating, and database connections in other projects, but this was the first time I had to implement them from scratch in a language that did not have built-in support for them. This was a valuable learning experience, giving me a better understanding and insight into the inner workings of these systems.
+I have used systems like server-side routing, templating, and database connections in other projects, but this was the first time I had to implement them from scratch in a language that did not have built-in support for them. This was a valuable learning experience, giving me a better understanding and insight into the inner workings of these systems. The code for these systems is included for the sake of completeness, but it does not aim to fit into the suggested structure or topic areas of the Advanced Higher project like the rest of the codebase.
 
 Another skill developed was during the implementation of the Advanced Higher algorithms required, namely bubble sort, insertion sort, and binary search. These algorithms were originally designed to be implemented only for number types, though as the system deals with lots of text, they needed to be modified to work with string types as well. Due to the Luau language naturally overloading the greater-than and less-than operators to compare strings based on alphabetical ordering, the logic for comparing strings did not need to change.
 
@@ -49,7 +49,7 @@ However, this changed the types of data each algorithm could take as arguments a
 
 ## Ongoing testing and issues resolved
 
-During testing, it was found that it needed to support page actions, allowing the same page to accept requests of multiple types, such as GET and POST for pages with forms. This was implemented by adding an `page.actions` field to the table returned by every page, and allowing the router to call the correct action based on a query parameter in the request, otherwise using the `default` action.
+During testing, it was found that it needed to support page actions, allowing the same page to accept requests of multiple types, such as GET and POST for pages with forms. This was implemented by adding an `page.actions` field to the table returned by every page and allowing the router to call the correct action based on a query parameter in the request, otherwise using the `default` action.
 
 A second issue that occurred was due to the same code for posts being reused on many pages across the site, however the code couldn't be easily extracted into a function because of the frontend using a templating system. To solve this, the templating system was modified with a component system, exposed as a Load function, that allowed template files in the `/components` directory to be loaded and reused in other templates on multiple pages, increasing modularity and reducing code duplication.
 

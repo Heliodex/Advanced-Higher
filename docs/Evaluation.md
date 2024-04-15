@@ -6,15 +6,15 @@ The initial goal of the project was to create a basic microblogging platform, wh
 
 The results of testing with both unit tests and manual test tables have shown that the implementation of the solution meets all original functional and end-user requirements. Completed requirements include:
 
--   Use of a database to store user data, sessions, and posts
--   Navigation bar for easy navigation, available on all pages
--   Validation of all user input to prevent attacks on the login, registration, post creation, and search forms
--   Registration of user accounts with storage of usernames and passwords in a database table, showing a helpful error message if the username is invalid or already taken
--   Login system that checks user credentials against the database and creates a session if correct, showing a helpful error message if incorrect
--   Search functionality for finding posts by content, showing a helpful error message if the search query is empty
--   Homepage for viewing recent posts in reverse chronological order
--   Profile page for viewing recent posts by a specific user
--   Easy navigation between all pages, including different user profile pages
+-   Use of a database to store user data, sessions, and posts.
+-   Navigation bar for easy navigation, available on all pages.
+-   Validation of all user input to prevent attacks on the login, registration, post creation, and search forms.
+-   Registration of user accounts with storage of usernames and passwords in a database table, showing a helpful error message if the username is invalid or already taken.
+-   Login system that checks user credentials against the database and creates a session if correct, showing a helpful error message if incorrect.
+-   Search functionality for finding posts by content, showing a helpful error message if the search query is empty.
+-   Homepage for viewing recent posts in reverse chronological order.
+-   Profile page for viewing recent posts by a specific user.
+-   Easy navigation between all pages, including different user profile pages.
 
 ## Results of testing
 
