@@ -64,22 +64,22 @@ Expected result: 7
 Actual result: 7  
 Outcome: Pass
 
-Type: Extreme
-Test data: { 5, 5, 5, 5, 5, 5, 5, 5, 5 }, 5
-Expected result: 1 (the first occurrence of the value)
-Actual result: 5
+Type: Extreme  
+Test data: { 5, 5, 5, 5, 5, 5, 5, 5, 5 }, 5  
+Expected result: 1 (the first occurrence of the value)  
+Actual result: 5  
 Outcome: Fail
 
-Type: Extreme
-Test data: { }, 1
-Expected result: -1
-Actual result: -1
+Type: Extreme  
+Test data: { }, 1  
+Expected result: -1  
+Actual result: -1  
 Outcome: Pass
 
-Type: Exceptional
-Test data: { 2, 7, 3, 5, 9, 1, 6, 8, 4 }, 69
-Expected result: -1 (value not found)
-Actual result: -1
+Type: Exceptional  
+Test data: { 2, 7, 3, 5, 9, 1, 6, 8, 4 }, 69  
+Expected result: -1 (value not found)  
+Actual result: -1  
 Outcome: Pass
 
 ## Testing site functionality
