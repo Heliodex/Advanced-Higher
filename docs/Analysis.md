@@ -32,7 +32,7 @@ The full implementation of the site will include:
 
 Time - Since beginning the project on 23 November 2023, I have between 4 and 5 months to complete the project before it should be submitted by 15 April 2024.  
 Cost - The project will have no development cost, as it will be using entirely free and open-source software.  
-Technical - The main logic for the site (backend) will be written in Luau, as it's the language I'm most familiar with.
+Technical - The main logic for the site (backend) will be written in Luau, as it's the language I'm most familiar with.  
 Legal - The project will not store any personal data other than usernames and passwords, so should comply with all relevant data protection laws including the DPA and GDPR, and must also comply with the Copyright, Designs and Patents Act.
 
 ## UML use case diagram
