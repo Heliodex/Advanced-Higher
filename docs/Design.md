@@ -62,8 +62,8 @@ Insert: username, password
 Table: users  
 Values: validated inputs from registration form
 
-Insert: id, username
-Table: sessions
+Insert: id, username  
+Table: sessions  
 Values: generated session token, validated input username
 
 #### Login query
@@ -105,8 +105,8 @@ Where: user username matches the username provided in the URL
 
 #### Search query
 
-Select: post id, post time, post content, user username
-Table: post
+Select: post id, post time, post content, user username  
+Table: post  
 Join: user where post username = user username
 
 Result of all posts will be searched with binary search
@@ -117,19 +117,19 @@ All fields are required and not null on all tables
 
 #### User table
 
-Username: varchar(255) (primary key)
+Username: varchar(255) (primary key)  
 Password: varchar(255)
 
 #### Session table
 
-Id: varchar(255) (primary key)
+Id: varchar(255) (primary key)  
 Username: varchar(255) (foreign key referencing user username)
 
 #### Post table
 
-Id: int (primary key, auto-increment)
-Time: datetime (default to current time)
-Content: text
+Id: int (primary key, auto-increment)  
+Time: datetime (default to current time)  
+Content: text  
 Username: varchar(255) (foreign key referencing user username)
 
 #### Entity-relationship diagram
